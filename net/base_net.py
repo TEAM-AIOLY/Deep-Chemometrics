@@ -2,81 +2,107 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch
+from tensorflow.python.keras.utils.version_utils import training
 from torch import nn
 from einops import rearrange, repeat, pack, unpack
 from einops.layers.torch import Rearrange
-from torchvision.ops.misc import SqueezeExcitation
+from typing import Callable, Optional, Tuple, Union
+import math
+import numbers
+from torch import Tensor
 
-from mambular.base_models import BaseModel
 import torch
-import torch.nn
+import torch.nn as nn
+import torch.nn.functional as F
 
-class RNN(nn.Module):
-    def __init__(self, input_dims, mean, std, hidden_dim_lstm = 2048, num_layers_lstm = 1, dropout_lstm = 0.2, out_dims = 1, bidirectional=True, num_fc = 1, out_dims_per_fc = (1), dropout_fc = (0.0)):
-        super(RNN, self).__init__()
+
+class Darionet(nn.Module):
+    def __init__(self, mean, std ,filter_size, reg_beta, input_dims,out_dims=1,p = 0.1):
+        super(Darionet, self).__init__()
+
+        ## Dimensions of the input layer
         self.input_dims = input_dims
-        self.mean = nn.Parameter(torch.tensor(mean).float(),requires_grad=False)
-        self.std = nn.Parameter(torch.tensor(std).float(),requires_grad=False)
-        self.out_dims = out_dims
-        self.dropout_lstm = dropout_lstm
-        self.hidden_dim_lstm = hidden_dim_lstm
-        self.num_layers_lstm = num_layers_lstm
-        self.bidirectional = bidirectional
-        if self.bidirectional:
-            self.d = 2
-        else:
-            self.d = 1
-        self.model = nn.Sequential()
-        self.sqz = SqueezeExcitation(self.input_dims,self.input_dims)
-        self.lstm = nn.LSTM(self.input_dims, self.hidden_dim_lstm, dropout=self.dropout_lstm, bidirectional=self.bidirectional, num_layers=self.num_layers_lstm, batch_first=True)
-        # self.fc = nn.Linear(self.d*self.hidden_dim_lstm, self.out_dims)
-        self.out_dims_per_fc  = out_dims_per_fc
-        self.num_fc = num_fc
-        self.dropout_fc = dropout_fc
-        self.fc = []
-        out_dim_fc = self.d*self.hidden_dim_lstm
-        for i in range(0,self.num_fc-1):
-            self.fc.append(nn.Linear(out_dim_fc, self.out_dims_per_fc[i]))
-            out_dim_fc = self.out_dims_per_fc[i]
-        self.fc.append(nn.Linear(out_dim_fc, self.out_dims))
-    def forward(self, x):
-        # Reshape input
-        x = (x-self.mean)/self.std
-        # # print(x.shape)
-        # x = x[:,:,None,:]
-        # # print(x.shape)
-        # x = torch.permute(x,[0,3,2,1])
-        # # print(x.shape)
-        # x = self.sqz(x)
-        # # print(x.shape)
-        # x = torch.permute(x,[0,2,3,1])
-        # x = torch.squeeze(x,dim=2)
-        
-        # Initialize the hidden state
-        h0 = torch.zeros(self.d * self.num_layers_lstm, x.size(0), self.hidden_dim_lstm).to(x.device)
-        
-        # Initialize the cell state 
-        c0 = torch.zeros(self.d * self.num_layers_lstm, x.size(0), self.hidden_dim_lstm).to(x.device)
-        
-        # Pass the input through the LSTM layer
-        out1, _ = self.lstm(x, (h0, c0))
-        
-        # Get the last output of the LSTM layer
-        out1 = out1[:,-1]
-        # out1 = F.dropout(out1, p=self.dropout_lstm, training=self.training)
-        
-        # Pass the output through the fully connected layer
-        # out = self.fc(out1)
+        self.mean = nn.Parameter(torch.tensor(mean).float(), requires_grad=False)
+        self.std = nn.Parameter(torch.tensor(std).float(), requires_grad=False)
 
-        out = out1
-        for i in range(0,self.num_fc):
-            self.fc[i] = self.fc[i].to(x.device)
-            out = F.elu(self.fc[i](out))
-            out = F.dropout(out, p=self.dropout_fc[i], training=self.training)
-        return out
+        ## Conv layer parameters
+        self.conv1d_dims = self.input_dims
+        self.k_number = 1
+        self.k_width = filter_size
+        self.k_stride = 1
+
+        ## Fully connected layers dimensions
+        self.fc1_dims = 128
+        self.fc2_dims = 64
+        self.fc3_dims = 16
+        self.out_dims = out_dims
+
+        ## L2 regularization (implemented later in the forward pass)
+        self.beta = reg_beta / 2.0
+
+        ## Convolutional layer
+        self.conv1 = nn.Conv1d(in_channels=1, out_channels=self.k_number, kernel_size=self.k_width,
+                               stride=self.k_stride, padding='same')
+
+        ## Fully connected layers
+        self.fc1 = nn.Linear(self.conv1d_dims, self.fc1_dims)
+        self.fc2 = nn.Linear(self.fc1_dims, self.fc2_dims)
+        self.fc3 = nn.Linear(self.fc2_dims, self.fc3_dims)
+        ## manual dropout layer
+        self.dropout = ManualDropout(p=p)
+        ## Output layer
+        self.output_layer = nn.Linear(self.fc3_dims, self.out_dims)
+
+        ## He initialization (Kaiming initialization in PyTorch)
+        self._initialize_weights()
+
+    def _initialize_weights(self):
+        """Apply He normal initialization to layers"""
+        for layer in self.modules():
+            if isinstance(layer, nn.Conv1d) or isinstance(layer, nn.Linear):
+                nn.init.kaiming_normal_(layer.weight, nonlinearity='relu')
+                if layer.bias is not None:
+                    nn.init.constant_(layer.bias, 0)
+
+    def forward(self, x):
+        # Reshape input to (batch_size, 1, input_dims) for 1D convolution
+        x = (x - self.mean) / self.std
+
+        # Convolutional layer followed by ELU activation
+        x = F.elu(self.conv1(x))
+
+        # Flatten the tensor after convolution
+        x = x.view(x.size(0), -1)
+
+        # Fully connected layers with ELU activation
+        x = F.elu(self.fc1(x))
+        x = F.elu(self.fc2(x))
+        x = F.elu(self.fc3(x))
+        #Dropout layer
+        x = self.dropout(x)
+        # Output layer with linear activation
+        output = self.output_layer(x)
+
+        # Return the final output
+        return output
+
+
+
+
+class ManualDropout(nn.Module):
+    def __init__(self, p=0.5):
+        super(ManualDropout, self).__init__()
+        self.p = p
+
+
+    def forward(self, x):
+
+        mask = (torch.rand_like(x) > self.p).float()
+        return x * mask / (1 - self.p)
+
 
 class CuiNet(nn.Module):
-    def __init__(self, input_dims, mean,std,dropout=0.2,out_dims=1):
+    def __init__(self, input_dims, mean,std,dropout=0.1,out_dims=1):
         super(CuiNet, self).__init__()
         
         # Layers dimensions
@@ -88,7 +114,7 @@ class CuiNet(nn.Module):
         self.fc2_dims = 18
         self.fc3_dims = 12
         self.out_dims = out_dims
-        self.dropout=dropout
+        self.dropout= ManualDropout(p=dropout)
         self.mean = nn.Parameter(torch.tensor(mean).float(),requires_grad=False)
         self.std = nn.Parameter(torch.tensor(std).float(),requires_grad=False)
         
@@ -124,10 +150,9 @@ class CuiNet(nn.Module):
         x = F.elu(self.fc1(x))
         x = F.elu(self.fc2(x))
         x = F.elu(self.fc3(x))
-        x = F.dropout(x, p=self.dropout, training=self.training)
+        x = self.dropout(x)
         # Output layer with linear activation
         x = self.out(x)
-        
         return x
 
 
@@ -494,7 +519,7 @@ class ViT_1D(nn.Module):
         )
 
     def forward(self, x):
-        
+
         x = (x - self.mean) / self.std
         x = x[...,:self.crop]
 
@@ -513,3 +538,355 @@ class ViT_1D(nn.Module):
         cls_tokens, _ = unpack(x, ps, 'b * d')
         out = self.mlp_head(cls_tokens)
         return out
+
+
+# modified from AstroCLIP
+
+
+
+class CrossAttentionHead(nn.Module):
+    """Cross-attention head with dropout.
+
+    This module is a single head of a cross-attention layer. It takes a query and a key
+    tensor, computes the attention weights, and returns the weighted sum of the values
+    tensor. The attention weights are also returned.
+
+    :param embed_dim: dimensionality of the input tensors
+    :param n_head: number of heads
+    :param model_embed_dim: dimensionality of the model tensors
+    :param dropout: amount of dropout
+    """
+
+    embed_dim: int
+    n_head: int
+    model_embed_dim: int
+    dropout: float
+
+    def __init__(
+        self,
+        embed_dim: int,
+        n_head: int,
+        model_embed_dim: int,
+        dropout: float,
+    ):
+        super().__init__()
+        self.query = nn.Parameter(torch.randn(1, 1, embed_dim))
+        self.multihead_attn = nn.MultiheadAttention(
+            embed_dim=embed_dim,
+            num_heads=n_head,
+            batch_first=True,
+            kdim=model_embed_dim,
+            vdim=model_embed_dim,
+        )
+        self.layernorm = nn.LayerNorm(embed_dim)
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, x: torch.tensor):
+        batch_size = x.shape[0]
+        attentions = self.multihead_attn(
+            query=self.query.repeat(batch_size, 1, 1),
+            key=x,
+            value=x,
+            average_attn_weights=False,
+        )[0]
+        x = self.layernorm(self.dropout(attentions))
+        return x, attentions[1]
+
+
+class MLP(nn.Module):
+    """A two-layer MLP.
+
+    This uses a fully-connected layer to encode the input, then applies a non-linearity,
+    then uses another fully-connected layer to decode back to the initial dimension, and
+    finally applies (optional) dropout.
+
+    :param in_features: size of input layer
+    :param hidden_features: size of hidden layer
+    :param activation: activation function to use after the expansion; default: GELU
+    :param dropout: amount of dropout
+    :param bias: whether to use bias in the layers
+    """
+
+    in_features: int
+    hidden_features: int
+    activation: Callable
+    dropout: float
+    bias: bool
+
+    def __init__(
+        self,
+        in_features: int,
+        hidden_features: int,
+        activation: Optional[Callable] = None,
+        dropout: float = 0.0,
+        bias: bool = True,
+    ):
+        super().__init__()
+
+        self.in_features = in_features
+        self.hidden_features = hidden_features
+        self.activation = activation if activation is not None else nn.GELU()
+        self.dropout = dropout
+        self.bias = bias
+
+        self.encoder = nn.Linear(in_features, hidden_features, bias=bias)
+        self.decoder = nn.Linear(hidden_features, in_features, bias=bias)
+        self.dropout_layer = nn.Dropout(dropout) if dropout > 0 else None
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = self.encoder(x)
+        x = self.activation(x)
+        x = self.decoder(x)
+        if self.dropout_layer is not None:
+            x = self.dropout_layer(x)
+        return x
+
+
+class SelfAttention(nn.Module):
+    """Collection of self-attention heads.
+
+    :param embedding_dim: total dimensionality of the model (equal to
+        `head_size * num_heads`)
+    :param num_heads: number of heads
+    :param bias: whether to include bias terms
+    :param dropout: amount of dropout; used both for the attention and for the residual
+        pathways
+    :param causal: if true, use causal self-attention
+    """
+
+    embedding_dim: int
+    num_heads: int
+    dropout: float
+    uses_flash: bool
+
+    def __init__(
+        self,
+        embedding_dim: int,
+        num_heads: int,
+        causal: bool,
+        dropout: float,
+        bias: bool = True,
+    ):
+        super().__init__()
+        if embedding_dim % num_heads != 0:
+            raise ValueError("embedding_dim should be divisible by num_heads")
+
+        self.embedding_dim = embedding_dim
+        self.num_heads = num_heads
+        self.dropout = dropout
+        self.causal = causal
+
+        # key, query, value projections for all heads, but in a batch
+        self.attention = nn.Linear(embedding_dim, 3 * embedding_dim, bias=bias)
+
+        # output projection
+        self.projection = nn.Linear(embedding_dim, embedding_dim, bias=bias)
+
+        # regularization
+        self.attention_dropout = nn.Dropout(dropout)
+        self.residual_dropout = nn.Dropout(dropout)
+
+        # flash attention makes GPU go brrrrr but support is only in PyTorch >= 2.0
+        self.uses_flash = hasattr(F, "scaled_dot_product_attention")
+        if not self.uses_flash:
+            print("Using slow attention. Flash Attention requires PyTorch >= 2.0.")
+
+            if self.causal:
+                self.register_buffer("mask", torch.empty((1, 1, 0, 0), dtype=bool))
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # batch size, sequence length, embedding dimensionality
+        B, T, C = x.shape
+        if C != self.embedding_dim:
+            raise ValueError(
+                f"Expected input shape (..., {self.embedding_dim}, got {x.shape})"
+            )
+
+        # calculate and separate out query, key, values for all heads
+        # each has shape (B, T, C)
+        q, k, v = self.attention(x).split(self.embedding_dim, dim=2)
+
+        # separate out head index and move it up next to the batch dimension
+        # final shape (B, num_heads, T, head_size), where C = num_heads * head_size
+        nh = self.num_heads
+        hs = C // nh
+        k = k.view(B, T, nh, hs).transpose(1, 2)
+        q = q.view(B, T, nh, hs).transpose(1, 2)
+        v = v.view(B, T, nh, hs).transpose(1, 2)
+
+        # self-attention: (B, nh, T, hs) x (B, nh, hs, T) -> (B, nh, T, T)
+        if self.uses_flash:
+            # efficient attention using Flash Attention CUDA kernels
+            dropout_p = self.dropout if self.training else 0
+            y = F.scaled_dot_product_attention(
+                q, k, v, attn_mask=None, dropout_p=dropout_p, is_causal=self.causal
+            )
+        else:
+            # manual implementation of attention
+            att = (q @ k.transpose(-2, -1)) * (1.0 / math.sqrt(hs))
+
+            if self.causal:
+                # cache the causal mask, if we're using one
+                if self.mask.shape[2] < T:
+                    self.mask = torch.tril(torch.ones(T, T)).view(1, 1, T, T) == 0
+                att = att.masked_fill(self.bias[:, :, :T, :T], float("-inf"))
+
+            att = F.softmax(att, dim=-1)
+            att = self.attention_dropout(att)
+            # (B, nh, T, T) x (B, nh, T, hs) -> (B, nh, T, hs)
+            y = att @ v
+
+        # re-assemble all head outputs side by side
+        y = y.transpose(1, 2).contiguous().view(B, T, C)
+
+        # output projection
+        y = self.residual_dropout(self.projection(y))
+        return y
+
+
+class TransformerBlock(nn.Module):
+    """A transformer block, including layer norm, self-attention, another layer norm,
+    and a two-layer MLP.
+
+    :param embedding_dim: total dimensionality of the self-attention model (equal to
+        `head_size * num_heads`)
+    :param num_heads: number of self-attention heads
+    :param bias: whether to include bias terms; used for layernorms, attention, and MLP
+    :param dropout: amount of dropout; used for attention, resiudal pathway, and MLP
+    :param causal: if true, use causal self-attention
+    :param mlp_expansion: ratio between embedding dimension and side of MLP hidden layer
+    """
+
+    def __init__(
+        self,
+        embedding_dim: int,
+        num_heads: int,
+        causal: bool,
+        dropout: float,
+        bias: bool = True,
+        mlp_expansion: int = 4,
+    ):
+        super().__init__()
+
+        self.layernorm1 = LayerNorm(embedding_dim, bias=bias)
+        self.attention = SelfAttention(
+            embedding_dim, num_heads, bias=bias, dropout=dropout, causal=causal
+        )
+        self.layernorm2 = LayerNorm(embedding_dim, bias=bias)
+
+        hidden_dim = mlp_expansion * embedding_dim
+        self.mlp = MLP(embedding_dim, hidden_dim, nn.GELU(), dropout=dropout, bias=bias)
+
+    def forward(self, x):
+        x = x + self.attention(self.layernorm1(x))
+        x = x + self.mlp(self.layernorm2(x))
+        return x
+
+
+class LayerNorm(nn.Module):
+    """Layer normalized with optional bias.
+
+    This is based on PyTorch's :class:`~torch.nn.LayerNorm` module but is needed because
+    PyTorch's version does not support disabling the bias.
+
+    :param shape: shape of the input, following an arbitrary number of batch dimensions;
+        that is, the input has dimensions `[d1, ..., dk, shape[0], ..., shape[-1]]`
+    :param eps: value added to the denominator for numerical stability
+    :param bias: whether to include a bias term
+    :param dtype: data type to use for the parameters
+    """
+
+    normalized_shape: Tuple[int, ...]
+    eps: float
+
+    def __init__(
+        self,
+        shape: Union[int, Tuple[int, ...], torch.Size],
+        eps: float = 1e-5,
+        bias: bool = True,
+        dtype=None,
+    ):
+        super().__init__()
+
+        self.eps = eps
+        if isinstance(shape, numbers.Integral):
+            self.normalized_shape = (shape,)
+        else:
+            self.normalized_shape = tuple(shape)
+
+        self.weight = nn.Parameter(torch.empty(shape))
+        self.bias = nn.Parameter(torch.empty(shape)) if bias else None
+
+        self.reset_parameters()
+
+    def reset_parameters(self):
+        torch.nn.init.ones_(self.weight)
+        if self.bias is not None:
+            torch.nn.init.zeros_(self.bias)
+
+    def forward(self, input):
+        return F.layer_norm(
+            input, self.normalized_shape, self.weight, self.bias, self.eps
+        )
+
+class SpecFormer(nn.Module):
+    def __init__(
+        self,
+        mean,
+        std,
+        input_dim: int,
+        embed_dim: int,
+        num_layers: int,
+        num_heads: int,
+        max_len: int,
+        out_dims: int,
+        dropout: float = 0.1
+    ):
+        super().__init__()
+        self.mean = nn.Parameter(torch.tensor(mean).float(), requires_grad=False)
+        self.std = nn.Parameter(torch.tensor(std).float(), requires_grad=False)
+        self.max_len = max_len
+        self.out_dims = out_dims
+        self.data_embed = nn.Linear(input_dim, embed_dim)
+        self.position_embed = nn.Embedding(max_len, embed_dim)
+        self.dropout = nn.Dropout(dropout)
+        self.blocks = nn.ModuleList(
+            [
+                TransformerBlock(
+                    embedding_dim=embed_dim,
+                    num_heads=num_heads,
+                    causal=False,
+                    dropout=dropout,
+                    bias=True,
+                )
+                for _ in range(num_layers)
+            ]
+        )
+        self.final_layernorm = LayerNorm(embed_dim, bias=True)
+        self.head = nn.Linear(embed_dim, out_dims, bias=True)
+
+    def forward(self, x: Tensor):
+        """Forward pass through the model."""
+        x = torch.squeeze(x)
+        x = x[...,None]
+        x = (x - self.mean) / self.std
+        t = x.shape[1]
+        if t > self.max_len:
+            raise ValueError(
+                f"Cannot forward sequence of length {t}, "
+                f"block size is only {self.max_len}"
+            )
+        pos = torch.arange(0, t, dtype=torch.long, device=x.device)  # shape (t)
+
+        # forward the GPT model itself
+        data_emb = self.data_embed(x)  # to shape (b, t, embedding_dim)
+        pos_emb = self.position_embed(pos)  # to shape (t, embedding_dim)
+
+        x = self.dropout(data_emb + pos_emb)
+        for block in self.blocks:
+            x = block(x)
+        x = self.final_layernorm(x)
+        # average pooling over the sequence
+        x = x.mean(dim=1)
+        output = self.head(x)
+        return output
