@@ -9,7 +9,7 @@ import torch
 import torch.nn.functional as F
 
 from net.chemtools.PLS import PLS
-from utils.testing import ccc,r2_score
+from net.chemtools.metrics import ccc, r2_score
 import pickle
 
 if __name__ == "__main__":

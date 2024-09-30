@@ -3,25 +3,6 @@ import pandas as pd
 import torch
 from torch.utils.data import Dataset, random_split
 
-class MangoDataset(Dataset):
-    def __init__(self, X, Y, transform=None):
-        self.X = X
-        self.Y = Y
-        self.transform = transform
-
-    def __len__(self):
-        return self.X.shape[0]
-    def __getitem__(self, idx):
-        if torch.is_tensor(idx):
-            idx = idx.tolist()
-        X = self.X[idx]
-        Y = self.Y[idx]
-        if self.transform:
-            X = self.transform(X)
-        return X, Y
-
-
-
 class SpectralDataset(Dataset):
     def __init__(self, data_path, y_labels="oc.usda.c729", dataset_type="visnir", test_size=0.2, random_seed=42):
         self.data_path = data_path

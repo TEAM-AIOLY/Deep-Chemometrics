@@ -1,4 +1,6 @@
 import torch
+from net.chemtools.metrics import ccc,r2_score
+import torch.nn.functional as F
 
 class PLS:
     def __init__(self, ncomp, weights=None):
@@ -67,7 +69,10 @@ class PLS:
             self.TT[a] = tt
 
     def transform(self, X):
-        X = torch.tensor(X, dtype=torch.float64)
+        if not isinstance(X, torch.Tensor):
+            X = torch.tensor(X, dtype=torch.float64)
+        else:
+            X = X.clone().detach().to(dtype=torch.float64)
         X = X - self.xmeans
         T_new = X @ self.R
         return T_new
@@ -91,7 +96,11 @@ class PLS:
         }
 
     def predict(self, X, nlv=None):
-        X = torch.tensor(X, dtype=torch.float64).clone().detach()
+        if not isinstance(X, torch.Tensor):
+            X = torch.tensor(X, dtype=torch.float64)
+        else:
+            X = X.clone().detach().to(dtype=torch.float64)
+            
         X = X - self.xmeans
 
         if nlv is None:
@@ -130,3 +139,47 @@ def getknn(Xr, Xu, k, diss="euclidean"):
     knn_distances = torch.gather(distances, 1, knn_indices)
 
     return {"listnn": knn_indices, "listd": knn_distances}
+
+
+def k_fold_cross_validation(X_train, Y_train, ncomp, k_folds=5):
+    fold_rmsecv = [[] for _ in range(k_folds)] 
+    fold_ccc = []
+    fold_r2 = []
+    
+    fold_size = X_train.shape[0] // k_folds
+    indices  = torch.randperm(X_train.shape[0])
+    
+    for fold in range(k_folds):
+        val_start = fold * fold_size
+        val_end = (fold + 1) * fold_size if fold < k_folds - 1 else X_train.shape[0]
+
+        val_indices = indices[val_start:val_end]
+        train_indices = torch.cat([indices[:val_start], indices[val_end:]])
+
+        X_train_fold = X_train[train_indices]
+        Y_train_fold = Y_train[train_indices]
+        X_val_fold = X_train[val_indices]
+        Y_val_fold = Y_train[val_indices]
+
+        pls = PLS(ncomp=ncomp)
+        pls.fit(X_train_fold, Y_train_fold)
+        
+        
+        perf = []
+        for lv in range(ncomp):
+            y_pred = pls.predict(X_val_fold, lv)
+            rmse = torch.sqrt(F.mse_loss(y_pred, Y_val_fold, reduction='none')).mean(dim=0)
+            perf.append(rmse)
+
+        y_pred_final = pls.predict(X_val_fold, ncomp - 1)
+        ccc_value = ccc(Y_val_fold, y_pred_final)
+        r2_value = r2_score(Y_val_fold, y_pred_final)
+        
+        fold_rmsecv[fold] = perf
+        fold_ccc.append(ccc_value)
+        fold_r2.append(r2_value)
+
+    return fold_rmsecv, fold_ccc, fold_r2
+    
+
+        

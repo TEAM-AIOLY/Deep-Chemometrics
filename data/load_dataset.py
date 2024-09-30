@@ -10,8 +10,8 @@ class SoilSpectralDataSet(Dataset):
     def __init__(self, dataset_type="visnir", data_path=None, preprocessing=None,y_labels="oc.usda.c729", reduce_lbd = False):
         if data_path==None:
             # Set default data path in project path if none provided
-            rel_dir = os.getcwd()
-            data_path = os.path.join(rel_dir, 'data/dataset/oss/ossl_all_L1_v1.2.csv')
+            rel_dir = os.path.dirname(os.path.abspath(__file__))
+            data_path = os.path.join(rel_dir, 'data/datasets/oss/ossl_all_L1_v1.2.csv')
             
         self.reduce_lbd = reduce_lbd
         self.data_path = data_path
@@ -31,6 +31,8 @@ class SoilSpectralDataSet(Dataset):
         if isinstance(y_labels, str):
             y_labels = [y_labels]
         self.y_labels = y_labels
+        
+        self.label_map = {label: label for label in self.y_labels}
         
         # Extract target variables
         Y = np.array(data_raw.filter(regex="|".join(y_labels)))
@@ -64,17 +66,22 @@ class SoilSpectralDataSet(Dataset):
     def __len__(self):
         return len(self.X)
 
-    def __getitem__(self, index):
+    def __getitem__(self, index,label_name=None):
         spectral_data = self.X[index, :]
         if self.reduce_lbd : 
             spectral_data = spectral_data[:-1]
-        label = self.Y[index]
+            
+        if label_name:
+            label_idx = self.y_labels.index(label_name)
+            label = self.Y[index, label_idx]
+        else:
+             label = self.Y[index]
         return spectral_data, np.log(label+1)
     
-    def get_labels(self):
-        return(self.y_names)
-
-
+  
+    
+  
+   
 
 
 # if __name__ == '__main__':
