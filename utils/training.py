@@ -144,6 +144,7 @@ def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, sav
             epoch_save_path = save_path + f'_epoch_{epoch + 1}.pth'
             torch.save(model.state_dict(), epoch_save_path)
             print(f'Model saved at epoch {epoch + 1} to {epoch_save_path}')
+        
 
     if save_path:
         final_save_path = save_path + f'_epoch_{num_epochs}_final.pth'

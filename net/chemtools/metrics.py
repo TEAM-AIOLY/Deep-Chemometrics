@@ -27,3 +27,8 @@ def r2_score(y_true, y_pred):
     ss_tot = torch.sum((y_true - torch.mean(y_true)) ** 2)
     r2 = 1 - (ss_res / ss_tot)
     return r2.item()
+
+
+def RMSEP(y_true, y_pred):
+    loss = torch.sqrt(torch.mean((y_true - y_pred) ** 2, dim=0))
+    return loss.item()
