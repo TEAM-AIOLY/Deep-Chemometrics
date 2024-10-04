@@ -147,25 +147,27 @@ if __name__ == "__main__":
     
     print("CCC: %5.5f, R2: %5.5f, RMSEP: %5.5f"%(CCC, r2, rmsep))
   
-    plt.figure(figsize=(8,6))
+    fig, ax = plt.subplots()
     
     # Scatter plot of X vs Y
-    plt.scatter(Y,y_pred,edgecolors='k',alpha=0.5)
+    fig.scatter(Y,y_pred,edgecolors='k',alpha=0.5)
     
     # Plot of the 45 degree line
-    plt.plot([Y.min()-1,Y.max()+1],[Y.min()-1,Y.max()+1],'r')
+    fig.plot([Y.min()-1,Y.max()+1],[Y.min()-1,Y.max()+1],'r')
     
-      
-    plt.text(0, 0.75*Y.max(), "CCC: %5.5f"%(CCC)+"\nR2: %5.5f"%(r2)+"\nRMSEP: %5.5f"%(rmsep),
-             fontsize=16, bbox=dict(facecolor='white', alpha=0.5))
-
+    plt.text(0.05, 0.95, f'CCC: {CCC:.2f}\nR²: {r2:.2f}', 
+                transform=plt.gca().transAxes, fontsize=12,
+                verticalalignment='top', horizontalalignment='left',
+                bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5'),
+                color='red', fontweight='bold', fontfamily='serif')
     
-    plt.xticks(fontsize=16)
-    plt.yticks(fontsize=16)
-    plt.xlabel('Observed',fontsize=16)
-    plt.ylabel('Predicted',fontsize=16)
+    ax.set_xlabel('Real Values')
+    ax.set_ylabel('Predicted Values')
+    ax.set_title(f'Predicted vs Real Values for {labs} (log x + 1)')
     
-    plt.show(block=False)
+    plt.tight_layout()
+    plt.grid()
+    fig.show(block=False)
     
     pdf_path = os.path.join(base_path, f'predicted_vs_observed_{dataset_type}_{labs}.pdf')
     plt.savefig(pdf_path, format='pdf')
