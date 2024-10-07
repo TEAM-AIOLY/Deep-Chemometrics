@@ -3,12 +3,12 @@ import os
 
 # Define the base parameters
 base_params = {
-    "dataset_type": "nir",
+    "dataset_type": "mir",
     "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",  
     "y_labels": [],
     "batch_size": 1024,
     "num_epochs": 1000,
-    "model_name": "_ResNet18_OSSL_",
+    "model_name": "_ResNet34_OSSL_",
     "seed": 42,
     "spec_dims": None,
     "mean": None,
@@ -38,7 +38,7 @@ params_all["y_labels"] = [label for option in y_labels_options for label in opti
 params_list.append(params_all)
 
 data_path ="./data/dataset/ossl/ossl_all_L1_v1.2.csv"
-param_file = os.path.dirname(data_path)+ '/optuna_ResNet18_params_nir.json'
+param_file = os.path.dirname(data_path)+ '/optuna_ResNet34_params_mir.json'
 
 # Write the list to a JSON file
 with open(param_file, 'w') as f:
