@@ -22,13 +22,17 @@ def objective(trial, params):
     WD = trial.suggest_float("weight_decay", 1e-4, 1e-2, log=True)
 
     # Data augmentation parameters to be optimized
-    slope = trial.suggest_float("slope", 0.0, 0.3)
-    offset = trial.suggest_float("offset", 0.0, 0.3)
-    noise = trial.suggest_float("noise", 0.0, 0.3)
-    shift = trial.suggest_float("shift", 0.0, 0.3)
+    # slope = trial.suggest_float("slope", 0.0, 0.3)
+    # offset = trial.suggest_float("offset", 0.0, 0.3)
+    # noise = trial.suggest_float("noise", 0.0, 0.3)
+    # shift = trial.suggest_float("shift", 0.0, 0.3)
     
-    DP =trial.suggest_float("dropout", 0.0, 0.75)
-    IP =trial.suggest_int("inplanes", 4, 32)
+    # DP =trial.suggest_float("dropout", 0.0, 0.75)
+    # IP =trial.suggest_int("inplanes", 4, 32)
+    
+    slope = 0.1, offset = 0.1, noise = 0.1, shift = 0.1
+    DP=0.5
+    IP=8
 
     # Apply augmentation to the dataset using the suggested parameters
     augmentation = data_augmentation(slope=slope, offset=offset, noise=noise, shift=shift)

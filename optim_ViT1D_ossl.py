@@ -22,17 +22,27 @@ def objective(trial, params):
     WD = trial.suggest_float("weight_decay", 1e-4, 1e-2, log=True)
 
     # Data augmentation parameters to be optimized
-    slope = trial.suggest_float("slope", 0.0, 0.3)
-    offset = trial.suggest_float("offset", 0.0, 0.3)
-    noise = trial.suggest_float("noise", 0.0, 0.3)
-    shift = trial.suggest_float("shift", 0.0, 0.3)
+    # slope = trial.suggest_float("slope", 0.0, 0.3)
+    # offset = trial.suggest_float("offset", 0.0, 0.3)
+    # noise = trial.suggest_float("noise", 0.0, 0.3)
+    # shift = trial.suggest_float("shift", 0.0, 0.3)
     
-    PS =trial.suggest_int("patch_size", 8, 48)
-    DE=trial.suggest_int("dim_embed", 16, 64)
-    TL=trial.suggest_int("trans layer", 2, 16)
-    HDS=trial.suggest_int("heads", 2, 16)
-    MLP=trial.suggest_int("mlp_dim", 4, 64)
-            
+    # PS =trial.suggest_int("patch_size", 8, 48)
+    # DE=trial.suggest_int("dim_embed", 16, 64)
+    # TL=trial.suggest_int("trans layer", 2, 16)
+    # HDS=trial.suggest_int("heads", 2, 16)
+    # MLP=trial.suggest_int("mlp_dim", 4, 64)
+    
+    
+    slope = 0.1, offset = 0.1, noise = 0.1, shift = 0.1
+    
+    PS=48
+    DE=16
+    TL=8
+    HDS=8
+    MLP=16
+    
+  
 
     # Apply augmentation to the dataset using the suggested parameters
     augmentation = data_augmentation(slope=slope, offset=offset, noise=noise, shift=shift)
@@ -66,11 +76,8 @@ def objective(trial, params):
     _, _, val_r2_scores = train(model, optimizer, criterion, train_loader, val_loader, 
                                      num_epochs=params['num_epochs'], early_stop=False, plot_fig=False,save_path=None)
 
-   
-   
 
     return val_r2_scores
-
 
 
 if __name__ == "__main__":

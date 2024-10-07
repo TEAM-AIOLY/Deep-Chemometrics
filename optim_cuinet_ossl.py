@@ -58,8 +58,6 @@ def objective(trial, params):
                                      num_epochs=params['num_epochs'], early_stop=False, plot_fig=False,save_path=None)
 
    
-   
-
     return val_r2_scores
 
 
@@ -117,7 +115,7 @@ if __name__ == "__main__":
             "seed": params['seed']  
         }
         study = optuna.create_study(direction="maximize")
-        study.optimize(lambda trial: objective(trial, params_dict), n_trials=4)
+        study.optimize(lambda trial: objective(trial, params_dict), n_trials=100)
         
         best_trial = study.best_trial
         best_params = best_trial.params
