@@ -73,7 +73,7 @@ if __name__ == "__main__":
 
     params = {
         "dataset_type": "mir",
-        "data_path": "./data/dataset/ossl_all_L1_v1.2.csv",
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
         "y_labels": ["oc_usda.c729_w.pct"],
         "batch_size": 1024,
         "num_epochs": 1000,
