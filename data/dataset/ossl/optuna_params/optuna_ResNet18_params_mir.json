@@ -1,0 +1,90 @@
+[
+  {
+    "dataset_type": "mir",
+    "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+    "y_labels": [
+      "oc_usda.c729_w.pct"
+    ],
+    "batch_size": 1024,
+    "num_epochs": 1000,
+    "model_name": "_ResNet18_OSSL_",
+    "seed": 42,
+    "spec_dims": null,
+    "mean": null,
+    "std": null
+  },
+  {
+    "dataset_type": "mir",
+    "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+    "y_labels": [
+      "na.ext_usda.a726_cmolc.kg"
+    ],
+    "batch_size": 1024,
+    "num_epochs": 1000,
+    "model_name": "_ResNet18_OSSL_",
+    "seed": 42,
+    "spec_dims": null,
+    "mean": null,
+    "std": null
+  },
+  {
+    "dataset_type": "mir",
+    "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+    "y_labels": [
+      "clay.tot_usda.a334_w.pct"
+    ],
+    "batch_size": 1024,
+    "num_epochs": 1000,
+    "model_name": "_ResNet18_OSSL_",
+    "seed": 42,
+    "spec_dims": null,
+    "mean": null,
+    "std": null
+  },
+  {
+    "dataset_type": "mir",
+    "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+    "y_labels": [
+      "k.ext_usda.a725_cmolc.kg"
+    ],
+    "batch_size": 1024,
+    "num_epochs": 1000,
+    "model_name": "_ResNet18_OSSL_",
+    "seed": 42,
+    "spec_dims": null,
+    "mean": null,
+    "std": null
+  },
+  {
+    "dataset_type": "mir",
+    "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+    "y_labels": [
+      "ph.h2o_usda.a268_index"
+    ],
+    "batch_size": 1024,
+    "num_epochs": 1000,
+    "model_name": "_ResNet18_OSSL_",
+    "seed": 42,
+    "spec_dims": null,
+    "mean": null,
+    "std": null
+  },
+  {
+    "dataset_type": "mir",
+    "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+    "y_labels": [
+      "oc_usda.c729_w.pct",
+      "na.ext_usda.a726_cmolc.kg",
+      "clay.tot_usda.a334_w.pct",
+      "k.ext_usda.a725_cmolc.kg",
+      "ph.h2o_usda.a268_index"
+    ],
+    "batch_size": 1024,
+    "num_epochs": 1000,
+    "model_name": "_ResNet18_OSSL_",
+    "seed": 42,
+    "spec_dims": null,
+    "mean": null,
+    "std": null
+  }
+]

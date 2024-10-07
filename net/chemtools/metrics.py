@@ -3,6 +3,7 @@ import torch
 
 def ccc(y_true, y_pred):
     # Calculate correlation
+    
     mean_true = torch.mean(y_true)
     mean_pred = torch.mean(y_pred)
     cor = torch.mean((y_true - mean_true) * (y_pred - mean_pred)) / (torch.std(y_true) * torch.std(y_pred))

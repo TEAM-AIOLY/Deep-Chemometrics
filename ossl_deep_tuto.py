@@ -57,7 +57,7 @@ if __name__ == "__main__":
    
    
     augmentation = data_augmentation(slope = 0.1, offset = 0.1, noise = 0.1, shift = 0.1)
-    spectral_data = SoilSpectralDataSet(data_path=data_path, dataset_type=dataset_type, y_labels=y_labels, preprocessing=None)
+    spectral_data = SoilSpectralDataSet(data_path=data_path, dataset_type=dataset_type, y_labels=y_labels, preprocessing=augmentation)
     spec_dims = spectral_data.spec_dims
     dataset_size = len(spectral_data)
     test_size = int(0.2 * dataset_size)  
@@ -176,7 +176,7 @@ if __name__ == "__main__":
     with open(pickle_path, 'wb') as f:
         pickle.dump(fig, f)
     
-    
+
     
     fig, ax = plt.subplots()
     hexbin = ax.hexbin(Y.squeeze().numpy(), y_pred.squeeze().numpy(), gridsize=50, cmap='viridis', mincnt=1)

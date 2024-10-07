@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 
 class SoilSpectralDataSet(Dataset):
-    def __init__(self, dataset_type="visnir", data_path=None, preprocessing=None,y_labels="oc.usda.c729", reduce_lbd = False):
+    def __init__(self, dataset_type="mir", data_path=None, preprocessing=None,y_labels="oc.usda.c729", reduce_lbd = False):
         if data_path==None:
             # Set default data path in project path if none provided
             rel_dir = os.path.dirname(os.path.abspath(__file__))
@@ -41,7 +41,7 @@ class SoilSpectralDataSet(Dataset):
         # Initialize X and Y based on dataset type
         if dataset_type == "mir":
            self.X, self.Y = self._process_data(data_raw, mask, "mir", "abs")
-        elif dataset_type == "nir":
+        elif dataset_type == "nir" or dataset_type =="visnir":
            self.X, self.Y = self._process_data(data_raw, mask, "visnir", "ref")
         else:
            raise ValueError("dataset_type must be either 'mir' or 'nir'")

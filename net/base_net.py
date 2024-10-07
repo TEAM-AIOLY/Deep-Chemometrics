@@ -20,8 +20,8 @@ class CuiNet(nn.Module):
         self.fc3_dims = 12
         self.out_dims = out_dims
         self.dropout=dropout
-        self.mean = nn.Parameter(torch.tensor(mean).float(),requires_grad=False)
-        self.std = nn.Parameter(torch.tensor(std).float(),requires_grad=False)
+        self.mean = nn.Parameter((mean).float(),requires_grad=False)#.clone().detach()
+        self.std = nn.Parameter((std).float(),requires_grad=False)
         
         # Convolutional layer
         self.conv1d = nn.Conv1d(1,1, kernel_size= 5 , stride=1)
@@ -116,8 +116,8 @@ class DeepSpectraCNN(nn.Module):
         super(DeepSpectraCNN, self).__init__()
         self.conv1d_dims = input_dim
         self.dropout=dropout
-        self.mean = nn.Parameter(torch.tensor(mean).float(),requires_grad=False)
-        self.std = nn.Parameter(torch.tensor(std).float(),requires_grad=False)
+        self.mean = nn.Parameter(mean.clone().detach().float(),requires_grad=False)
+        self.std = nn.Parameter(std.clone().detach().float(),requires_grad=False)
         self.out_dims=out_dims
                
         kernel_size = 7
@@ -224,8 +224,8 @@ class ResNet1D(nn.Module):
         super(ResNet1D, self).__init__()
         self.in_planes = inplanes
         self.dropout=dropout
-        self.mean = nn.Parameter(torch.tensor(mean).float(), requires_grad=False)
-        self.std = nn.Parameter(torch.tensor(std).float(), requires_grad=False)
+        self.mean = nn.Parameter(mean.clone().detach().float(),requires_grad=False)
+        self.std = nn.Parameter(std.clone().detach().float(),requires_grad=False)
         self.conv1 = nn.Sequential(
             nn.Conv1d(in_channel, self.in_planes, kernel_size=7, stride=2, padding=3, bias=False),
             nn.BatchNorm1d(self.in_planes),
@@ -400,8 +400,8 @@ class ViT_1D(nn.Module):
             self.crop = None
 
         self.out_dims=out_dims
-        self.mean = nn.Parameter(torch.tensor(mean).float(), requires_grad=False)
-        self.std = nn.Parameter(torch.tensor(std).float(), requires_grad=False)
+        self.mean = nn.Parameter(mean.clone().detach().float(),requires_grad=False)
+        self.std = nn.Parameter(std.clone().detach().float(),requires_grad=False)
 
         num_patches = seq_len // patch_size
         patch_dim = channels * patch_size

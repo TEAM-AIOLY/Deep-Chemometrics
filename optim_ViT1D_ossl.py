@@ -1,31 +1,20 @@
-import json
-import numpy as np
+
 import os
 import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader, random_split
 
-from net.base_net import CuiNet, ViT_1D,ResNet18_1D,DeepSpectraCNN
+from net.base_net import ViT_1D
 from data.load_dataset import SoilSpectralDataSet
 from utils.training import train
-from utils.testing import test
 from utils.misc import data_augmentation
-from net.chemtools.metrics import ccc, r2_score, RMSEP
 
 import optuna
 
-def create_model(model_type, spec_dims, mean, std, out_dims,y_labels):
-    if model_type == "CuiNet":
-        return CuiNet(spec_dims, mean = mean,std = std, out_dims=len(y_labels))
-    elif model_type == "ViT_1D":
-        return ViT_1D(mean = mean, std = std, seq_len = spec_dims, patch_size = 50, dim_embed = 64, trans_layers = 8, heads = 8, mlp_dim = 64, out_dims = len(y_labels))
-    elif model_type == "ResNet18_1D":
-        return ResNet18_1D(num_classes=len(y_labels),head='mlp',mean=mean,std=std)
-    elif model_type == "DeepSpectraCNN":
-        return DeepSpectraCNN(spec_dims, mean = mean,std = std,out_dims=len(y_labels))
-    
-    else:
-        raise ValueError(f"Unknown model type: {model_type}")
+import json
+
+
+
 
 def objective(trial, params):
     # Hyperparameter suggestions
@@ -37,6 +26,13 @@ def objective(trial, params):
     offset = trial.suggest_float("offset", 0.0, 0.3)
     noise = trial.suggest_float("noise", 0.0, 0.3)
     shift = trial.suggest_float("shift", 0.0, 0.3)
+    
+    PS =trial.suggest_int("patch_size", 25, 150)
+    DE=trial.suggest_int("dim_embed", 16, 256)
+    TL=trial.suggest_int("trans layer", 2, 32)
+    HDS=trial.suggest_int("heads", 2, 32)
+    MLP=trial.suggest_int("mlp_dim", 8, 256)
+                 
 
     # Apply augmentation to the dataset using the suggested parameters
     augmentation = data_augmentation(slope=slope, offset=offset, noise=noise, shift=shift)
@@ -50,7 +46,7 @@ def objective(trial, params):
     train_size = int(0.75 * train_val_size)
     val_size = train_val_size - train_size
 
-    train_val_dataset, test_dataset = random_split(spectral_data, [train_val_size, test_size], 
+    train_val_dataset, _ = random_split(spectral_data, [train_val_size, test_size], 
                                                    generator=torch.Generator().manual_seed(params['seed']))
     train_dataset, val_dataset = random_split(train_val_dataset, [train_size, val_size], 
                                               generator=torch.Generator().manual_seed(params['seed']))
@@ -58,40 +54,36 @@ def objective(trial, params):
     # Create data loaders
     train_loader = DataLoader(train_dataset, batch_size=params['batch_size'], shuffle=True, num_workers=0)
     val_loader = DataLoader(val_dataset, batch_size=params['batch_size'], shuffle=False, num_workers=0)
-    test_loader = DataLoader(test_dataset, batch_size=params['batch_size'], shuffle=False, num_workers=0)
-    
+
 
     # Model, optimizer, and training
-    # model = CuiNet(params['spec_dims'], mean=params['mean'], std=params['std'], out_dims=len(params['y_labels']))
-    model=create_model(params['model_type'], params['spec_dims'], params['mean'], params['std'], len(params['y_labels']), params['y_labels'])
+    model=ViT_1D(mean = params['mean'], std = params['std'], seq_len = params['spec_dims'], patch_size = PS, 
+                 dim_embed = DE, trans_layers = TL, heads = HDS, mlp_dim = MLP, out_dims = len(params['y_labels']) )
+   
     optimizer = optim.Adam(model.parameters(), lr=LR, weight_decay=WD)
     criterion = nn.MSELoss(reduction='none')
 
-    _, _, _, final_save_path = train(model, optimizer, criterion, train_loader, val_loader, 
-                                     num_epochs=params['num_epochs'], early_stop=False, plot_fig=False,save_path=params['save_path'])
-    # Evaluate model performance
-    y_pred, Y = test(model, final_save_path, test_loader)
-    r2 = r2_score(y_pred, Y)
-    rmsep = RMSEP(y_pred, Y)
-    ccc_value = ccc(y_pred, Y)
+    _, _, val_r2_scores = train(model, optimizer, criterion, train_loader, val_loader, 
+                                     num_epochs=params['num_epochs'], early_stop=False, plot_fig=False,save_path=None)
 
-    return r2
+   
+   
 
+    return val_r2_scores
 
 
 
 if __name__ == "__main__":
-    # Load parameters from the file
+    
     data_path ="./data/dataset/ossl/ossl_all_L1_v1.2.csv"
      
-    param_file = os.path.dirname(data_path)+ '/optuna_params.json'
+    param_file = os.path.dirname(data_path)+ '/optuna_params/optuna_ViT1D_params_mir.json'
     
     with open(param_file,'r') as f:  
         params_dict = json.load(f)
     
     for param_set in params_dict:
         params = param_set
-        
 
         torch.manual_seed(params['seed'])
         if torch.cuda.is_available():
@@ -99,19 +91,13 @@ if __name__ == "__main__":
             torch.cuda.manual_seed_all(params['seed'])
             torch.backends.cudnn.deterministic = True
             torch.backends.cudnn.benchmark = False
+        
 
         spectral_data = SoilSpectralDataSet(data_path=params['data_path'], dataset_type=params['dataset_type'], 
-                                                y_labels=params['y_labels'], preprocessing=None)
+                                            y_labels=params['y_labels'], preprocessing=None)
         params['spec_dims'] = spectral_data.spec_dims
-
+        
         labs = '_'.join(params['y_labels'])  # Create a string from labels for the save path
-        save_path = os.path.dirname(params['data_path']) + f'/models/{params["dataset_type"]}/{params["model_name"]}/{labs}'
-        params['save_path'] = save_path
-
-        # Ensure save_path directory exists
-        if not os.path.exists(save_path):
-            os.makedirs(save_path)
-
         mean = torch.zeros(params['spec_dims'])
         std = torch.zeros(params['spec_dims'])
         train_loader = DataLoader(spectral_data, batch_size=params['batch_size'], shuffle=True, num_workers=0)
@@ -128,19 +114,38 @@ if __name__ == "__main__":
         params['mean'] = mean
         params['std'] = std
 
-
+        params_dict = {
+            'dataset_type': params['dataset_type'],
+            'data_path': params['data_path'],  # Add this line to include data_path
+            'spec_dims': params['spec_dims'],
+            'mean': params['mean'],
+            'std': params['std'],
+            'y_labels': params['y_labels'],
+            'num_epochs': params['num_epochs'],
+            "batch_size": params['batch_size'],
+            "seed": params['seed']  
+        }
         study = optuna.create_study(direction="maximize")
         study.optimize(lambda trial: objective(trial, params_dict), n_trials=100)
-
+        
         best_trial = study.best_trial
         best_params = best_trial.params
 
         print("Best hyperparameters: ", study.best_params)
-
-        params_path = os.path.dirname(params['data_path'])+'/optimize_models'+'/'+ params['dataset_type']+'/'+ params['model_name']
+        
+        params_path = os.path.dirname(params['data_path'])+f"/optimize_models/{params['dataset_type']}/{params['model_name']}/{labs}"
         if not os.path.exists(params_path):
-            os.makedirs(params_path)
+                os.makedirs(params_path)
+        
             
-        with open(os.path.join(params_path, 'best_params.txt'), 'w') as f:
+        with open((params_path+'/best_params.text'), 'w') as f:
             for key, value in best_params.items():
                 f.write(f"{key}: {value}\n")
+
+
+
+
+
+
+
+
