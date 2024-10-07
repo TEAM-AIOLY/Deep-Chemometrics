@@ -27,12 +27,12 @@ def objective(trial, params):
     noise = trial.suggest_float("noise", 0.0, 0.3)
     shift = trial.suggest_float("shift", 0.0, 0.3)
     
-    PS =trial.suggest_int("patch_size", 25, 150)
-    DE=trial.suggest_int("dim_embed", 16, 256)
-    TL=trial.suggest_int("trans layer", 2, 32)
-    HDS=trial.suggest_int("heads", 2, 32)
-    MLP=trial.suggest_int("mlp_dim", 8, 256)
-                 
+    PS =trial.suggest_int("patch_size", 8, 48)
+    DE=trial.suggest_int("dim_embed", 16, 64)
+    TL=trial.suggest_int("trans layer", 2, 16)
+    HDS=trial.suggest_int("heads", 2, 16)
+    MLP=trial.suggest_int("mlp_dim", 4, 64)
+            
 
     # Apply augmentation to the dataset using the suggested parameters
     augmentation = data_augmentation(slope=slope, offset=offset, noise=noise, shift=shift)
