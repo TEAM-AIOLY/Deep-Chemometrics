@@ -1,0 +1,26 @@
+[
+  {
+    "dataset_type": "mir",
+    "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+    "y_labels": ["oc_usda.c729_w.pct"],
+    "batch_size": 1024,
+    "num_epochs": 1000,
+    "model_name": "_CuiNet_OSSL_",
+    "seed": 42,
+    "spec_dims": null,
+    "mean": null,
+    "std": null
+  },
+  {
+    "dataset_type": "mir",
+    "data_path": "./data/dataset/ossl/ossl_all_L2_v1.2.csv",
+    "y_labels": ["sand_usda.c122_w.pct"],
+    "batch_size": 1024,
+    "num_epochs": 1000,
+    "model_name": "_CuiNet_OSSL_",
+    "seed": 42,
+    "spec_dims": null,
+    "mean": null,
+    "std": null
+  }
+]
