@@ -6,7 +6,7 @@
       "oc_usda.c729_w.pct"
     ],
     "batch_size": 1024,
-    "num_epochs": 1000,
+    "num_epochs": 500,
     "model_name": "_CuiNet_OSSL_",
     "seed": 42,
     "spec_dims": null,
@@ -20,7 +20,7 @@
       "na.ext_usda.a726_cmolc.kg"
     ],
     "batch_size": 1024,
-    "num_epochs": 1000,
+    "num_epochs": 500,
     "model_name": "_CuiNet_OSSL_",
     "seed": 42,
     "spec_dims": null,
@@ -34,7 +34,7 @@
       "clay.tot_usda.a334_w.pct"
     ],
     "batch_size": 1024,
-    "num_epochs": 1000,
+    "num_epochs": 500,
     "model_name": "_CuiNet_OSSL_",
     "seed": 42,
     "spec_dims": null,
@@ -48,7 +48,7 @@
       "k.ext_usda.a725_cmolc.kg"
     ],
     "batch_size": 1024,
-    "num_epochs": 1000,
+    "num_epochs": 500,
     "model_name": "_CuiNet_OSSL_",
     "seed": 42,
     "spec_dims": null,
@@ -62,7 +62,7 @@
       "ph.h2o_usda.a268_index"
     ],
     "batch_size": 1024,
-    "num_epochs": 1000,
+    "num_epochs": 500,
     "model_name": "_CuiNet_OSSL_",
     "seed": 42,
     "spec_dims": null,
@@ -80,7 +80,7 @@
       "ph.h2o_usda.a268_index"
     ],
     "batch_size": 1024,
-    "num_epochs": 1000,
+    "num_epochs": 500,
     "model_name": "_CuiNet_OSSL_",
     "seed": 42,
     "spec_dims": null,

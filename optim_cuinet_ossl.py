@@ -126,7 +126,7 @@ if __name__ == "__main__":
             "seed": params['seed']  
         }
         study = optuna.create_study(direction="maximize")
-        study.optimize(lambda trial: objective(trial, params_dict), n_trials=5)
+        study.optimize(lambda trial: objective(trial, params_dict), n_trials=2)
         
         best_trial = study.best_trial
         best_params = best_trial.params
