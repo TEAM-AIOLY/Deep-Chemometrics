@@ -49,11 +49,7 @@ class SoilSpectralDataSet(Dataset):
         self.spec_dims=self.X.shape[1]
         if self.reduce_lbd : 
             self.spec_dims -= 1
-        
-        # Apply preprocessing if provided
-        if self.preprocessing:
-           self.X = self.preprocessing(self.X)
-        
+             
 
     def _process_data(self, data_raw, mask, spectrum_type, filter_keyword):
         # Extract spectrum data
@@ -70,7 +66,10 @@ class SoilSpectralDataSet(Dataset):
         spectral_data = self.X[index, :]
         if self.reduce_lbd : 
             spectral_data = spectral_data[:-1]
-            
+           
+        if self.preprocessing:
+            spectral_data= self.preprocessing(spectral_data)
+        
         if label_name:
             label_idx = self.y_labels.index(label_name)
             label = self.Y[index, label_idx]

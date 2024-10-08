@@ -1,5 +1,6 @@
 
 import os
+import numpy as np
 import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader, random_split
@@ -13,6 +14,9 @@ import optuna
 
 import json
 
+import cProfile
+import pstats
+import io
 
 
 
@@ -29,23 +33,24 @@ def objective(trial, params):
 
     # Apply augmentation to the dataset using the suggested parameters
     augmentation = data_augmentation(slope=slope, offset=offset, noise=noise, shift=shift)
-    spectral_data = SoilSpectralDataSet(data_path=params['data_path'], dataset_type=params['dataset_type'], 
-                                         y_labels=params['y_labels'], preprocessing=augmentation)
-
-    # Dataset split (same logic as before)
+    spectral_data = SoilSpectralDataSet(data_path=params['data_path'], dataset_type=params['dataset_type'], y_labels=params['y_labels'],preprocessing=None)
+    
     dataset_size = len(spectral_data)
     test_size = int(0.2 * dataset_size)
-    train_val_size = dataset_size - test_size
-    train_size = int(0.75 * train_val_size)
-    val_size = train_val_size - train_size
+    train_size = dataset_size - test_size
+    cal_size = int(0.75 * train_size)
+    val_size = train_size - cal_size      
+    
 
-    train_val_dataset, _ = random_split(spectral_data, [train_val_size, test_size], 
+    train_dataset, _ = random_split(spectral_data, [train_size, test_size], 
                                                    generator=torch.Generator().manual_seed(params['seed']))
-    train_dataset, val_dataset = random_split(train_val_dataset, [train_size, val_size], 
+    cal_dataset, val_dataset = random_split(train_dataset, [cal_size, val_size], 
                                               generator=torch.Generator().manual_seed(params['seed']))
+    
+    cal_dataset.dataset.preprocessing=augmentation
 
     # Create data loaders
-    train_loader = DataLoader(train_dataset, batch_size=params['batch_size'], shuffle=True, num_workers=0)
+    cal_loader = DataLoader(cal_dataset, batch_size=params['batch_size'], shuffle=True, num_workers=0)
     val_loader = DataLoader(val_dataset, batch_size=params['batch_size'], shuffle=False, num_workers=0)
 
 
@@ -54,7 +59,7 @@ def objective(trial, params):
     optimizer = optim.Adam(model.parameters(), lr=LR, weight_decay=WD)
     criterion = nn.MSELoss(reduction='none')
 
-    _, _, val_r2_scores = train(model, optimizer, criterion, train_loader, val_loader, 
+    _, _, val_r2_scores = train(model, optimizer, criterion, cal_loader, val_loader, 
                                      num_epochs=params['num_epochs'], early_stop=False, plot_fig=False,save_path=None)
 
 
@@ -74,6 +79,8 @@ def objective(trial, params):
 
 
 if __name__ == "__main__":
+    pr = cProfile.Profile()
+    pr.enable()
     
     data_path ="./data/dataset/ossl/ossl_all_L1_v1.2.csv"
      
@@ -126,7 +133,7 @@ if __name__ == "__main__":
             "seed": params['seed']  
         }
         study = optuna.create_study(direction="maximize")
-        study.optimize(lambda trial: objective(trial, params_dict), n_trials=2)
+        study.optimize(lambda trial: objective(trial, params_dict), n_trials=30)
         
         best_trial = study.best_trial
         best_params = best_trial.params
@@ -145,7 +152,15 @@ if __name__ == "__main__":
 
 
 
+    pr.disable()
 
+    # Create a Stats object and print the results
+    s = io.StringIO()
+    sortby = pstats.SortKey.CUMULATIVE
+    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+    ps.print_stats()
+
+    print(s.getvalue())
 
 
 

@@ -35,23 +35,24 @@ def objective(trial, params):
 
     # Apply augmentation to the dataset using the suggested parameters
     augmentation = data_augmentation(slope=slope, offset=offset, noise=noise, shift=shift)
-    spectral_data = SoilSpectralDataSet(data_path=params['data_path'], dataset_type=params['dataset_type'], 
-                                         y_labels=params['y_labels'], preprocessing=augmentation)
-
-    # Dataset split (same logic as before)
+    spectral_data = SoilSpectralDataSet(data_path=params['data_path'], dataset_type=params['dataset_type'], y_labels=params['y_labels'],preprocessing=None)
+    
     dataset_size = len(spectral_data)
     test_size = int(0.2 * dataset_size)
-    train_val_size = dataset_size - test_size
-    train_size = int(0.75 * train_val_size)
-    val_size = train_val_size - train_size
+    train_size = dataset_size - test_size
+    cal_size = int(0.75 * train_size)
+    val_size = train_size - cal_size      
+    
 
-    train_val_dataset, _ = random_split(spectral_data, [train_val_size, test_size], 
+    train_dataset, _ = random_split(spectral_data, [train_size, test_size], 
                                                    generator=torch.Generator().manual_seed(params['seed']))
-    train_dataset, val_dataset = random_split(train_val_dataset, [train_size, val_size], 
+    cal_dataset, val_dataset = random_split(train_dataset, [cal_size, val_size], 
                                               generator=torch.Generator().manual_seed(params['seed']))
+    
+    cal_dataset.dataset.preprocessing=augmentation
 
     # Create data loaders
-    train_loader = DataLoader(train_dataset, batch_size=params['batch_size'], shuffle=True, num_workers=0)
+    cal_loader = DataLoader(cal_dataset, batch_size=params['batch_size'], shuffle=True, num_workers=0)
     val_loader = DataLoader(val_dataset, batch_size=params['batch_size'], shuffle=False, num_workers=0)
 
 
@@ -60,7 +61,7 @@ def objective(trial, params):
     optimizer = optim.Adam(model.parameters(), lr=LR, weight_decay=WD)
     criterion = nn.MSELoss(reduction='none')
 
-    _, _, val_r2_scores = train(model, optimizer, criterion, train_loader, val_loader, 
+    _, _, val_r2_scores = train(model, optimizer, criterion, cal_loader, val_loader, 
                                      num_epochs=params['num_epochs'], early_stop=False, plot_fig=False,save_path=None)
     criteria=None
     flattened = [item for sublist in val_r2_scores for item in sublist]
