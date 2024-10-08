@@ -18,7 +18,7 @@ import json
 
 def objective(trial, params):
     # Hyperparameter suggestions
-    LR = trial.suggest_float("lr", 1e-5, 1e-1, log=True)
+    LR = trial.suggest_float("lr", 1e-5, 1e-2, log=True)
     WD = trial.suggest_float("weight_decay", 1e-4, 1e-2, log=True)
 
     # Data augmentation parameters to be optimized
@@ -57,8 +57,19 @@ def objective(trial, params):
     _, _, val_r2_scores = train(model, optimizer, criterion, train_loader, val_loader, 
                                      num_epochs=params['num_epochs'], early_stop=False, plot_fig=False,save_path=None)
 
+
+    criteria=None
+    flattened = [item for sublist in val_r2_scores for item in sublist]
+    if len(flattened) == 1:
+        # If there's only one element after flattening, return that element as a float
+        criteria= float(flattened[0])
+    else:
+        # If there are multiple elements, return the mean of the values
+        criteria= float(sum(flattened) / len(flattened))
    
-    return val_r2_scores
+            
+ 
+    return criteria
 
 
 
@@ -115,7 +126,7 @@ if __name__ == "__main__":
             "seed": params['seed']  
         }
         study = optuna.create_study(direction="maximize")
-        study.optimize(lambda trial: objective(trial, params_dict), n_trials=100)
+        study.optimize(lambda trial: objective(trial, params_dict), n_trials=5)
         
         best_trial = study.best_trial
         best_params = best_trial.params

@@ -18,7 +18,7 @@ import json
 
 def objective(trial, params):
     # Hyperparameter suggestions
-    LR = trial.suggest_float("lr", 1e-5, 1e-1, log=True)
+    LR = trial.suggest_float("lr", 1e-5, 1e-2, log=True)
     WD = trial.suggest_float("weight_decay", 1e-4, 1e-2, log=True)
 
     # Data augmentation parameters to be optimized
@@ -27,8 +27,10 @@ def objective(trial, params):
     noise = trial.suggest_float("noise", 0.0, 0.3)
     shift = trial.suggest_float("shift", 0.0, 0.3)
     
-    DP =trial.suggest_float("dropout", 0.0, 0.75)
-    IP =trial.suggest_int("inplanes", 4, 32)
+    # DP =trial.suggest_float("dropout", 0.0, 0.75)
+    DP=0.5
+    # IP =trial.suggest_int("inplanes", 4, 32)
+    IP=8
 
     # Apply augmentation to the dataset using the suggested parameters
     augmentation = data_augmentation(slope=slope, offset=offset, noise=noise, shift=shift)
@@ -60,10 +62,18 @@ def objective(trial, params):
     _, _, val_r2_scores = train(model, optimizer, criterion, train_loader, val_loader, 
                                      num_epochs=params['num_epochs'], early_stop=False, plot_fig=False,save_path=None)
 
-   
+    criteria=None
+    flattened = [item for sublist in val_r2_scores for item in sublist]
+    
+    if len(flattened) == 1:
+        # If there's only one element after flattening, return that element as a float
+        criteria= float(flattened[0])
+    else:
+        # If there are multiple elements, return the mean of the values
+        criteria= float(sum(flattened) / len(flattened))
    
 
-    return val_r2_scores
+    return criteria
 
 
 
