@@ -62,8 +62,8 @@ def objective(trial, params):
     cal_dataset.dataset.preprocessing=augmentation
 
     # Create data loaders
-    cal_loader = DataLoader(cal_dataset, batch_size=params['batch_size'], shuffle=True, num_workers=0)
-    val_loader = DataLoader(val_dataset, batch_size=params['batch_size'], shuffle=False, num_workers=0)
+    cal_loader = DataLoader(cal_dataset, batch_size=params['batch_size'], shuffle=True, num_workers=8)
+    val_loader = DataLoader(val_dataset, batch_size=params['batch_size'], shuffle=False, num_workers=8)
 
 
     # Model, optimizer, and training
@@ -145,7 +145,20 @@ if __name__ == "__main__":
         study.optimize(lambda trial: objective(trial, params_dict), n_trials=100)
         
         best_trial = study.best_trial
-        best_params = best_trial.params
+        best_value = best_trial.value
+        if best_value < 1:
+            best_params = best_trial.params
+        else:
+            sorted_trials = sorted(study.trials, key=lambda t: t.value if t.value is not None else float('inf'))
+            second_best_trial = None
+            for trial in sorted_trials:
+                if trial.value is not None and trial.value < 1:
+                    second_best_trial = trial
+                    best_params = second_best_trial.params
+                    break
+       
+        
+       
 
         print("Best hyperparameters: ", study.best_params)
         
