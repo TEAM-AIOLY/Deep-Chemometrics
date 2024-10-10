@@ -1,0 +1,17 @@
+dataset_type: mir
+data_path: ./data/dataset/ossl/ossl_all_L1_v1.2.csv
+mean: tensor([1.5616, 1.5662, 1.5716,  ..., 0.2767, 0.2764, 0.2761])
+std: tensor([0.1780, 0.1788, 0.1804,  ..., 0.1758, 0.1757, 0.1757])
+y_labels: ['ph.h2o_usda.a268_index']
+num_epochs: 500
+batch_size: 1024
+seed: 42
+LR: 0.0035
+WD: 0.0055
+slope: 0.2
+offset: 0.2
+noise: 0.002
+shift: 0.05
+CCC: 0.7332465523974913
+r2: 0.3346557481086543
+rmsep: 0.12330662847041136
