@@ -1,0 +1,17 @@
+dataset_type: mir
+data_path: ./data/dataset/ossl/ossl_all_L1_v1.2.csv
+mean: tensor([1.5503, 1.5559, 1.5610,  ..., 0.2619, 0.2616, 0.2613])
+std: tensor([0.1668, 0.1620, 0.1635,  ..., 0.1425, 0.1425, 0.1425])
+y_labels: ['na.ext_usda.a726_cmolc.kg']
+num_epochs: 500
+batch_size: 1024
+seed: 42
+LR: 0.0001
+WD: 0.0055
+slope: 0.2
+offset: 0.2
+noise: 0.002
+shift: 0.05
+CCC: 0.6442493177162549
+r2: -0.059612019709812
+rmsep: 0.6701757103744221

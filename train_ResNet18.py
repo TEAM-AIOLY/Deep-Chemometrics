@@ -38,7 +38,7 @@ if __name__ == "__main__":
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
     
-    LR = 0.0035
+    LR = 0.0001
     WD = 0.0055
     
     slope= 0.2
@@ -110,8 +110,8 @@ if __name__ == "__main__":
 
 
         # Model, optimizer, and training
-        model = ResNet18_1D(params['spec_dims'], mean=params['mean'], std=params['std'], out_dims=len(params['y_labels']))
-        optimizer = optim.Adam(model.parameters(), lr=LR, weight_decay=WD,dropout=DP, inplanes=IP)
+        model = ResNet18_1D(mean=params['mean'], std=params['std'], out_dims=len(params['y_labels']),dropout=DP, inplanes=IP)
+        optimizer = optim.Adam(model.parameters(), lr=LR, weight_decay=WD)
         criterion = nn.MSELoss(reduction='none')
 
         train_losses, val_losses, val_r2_scores , final_save_path = train(model, optimizer, criterion, cal_loader, val_loader, 

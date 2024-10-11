@@ -14,9 +14,6 @@ import optuna
 
 import json
 
-import cProfile
-import pstats
-import io
 
 
 
@@ -55,12 +52,12 @@ def objective(trial, params):
 
 
     # Model, optimizer, and training
-    model = CuiNet(params['spec_dims'], mean=params['mean'], std=params['std'], out_dims=len(params['y_labels']))
+    model = CuiNet(input_dims=params['spec_dims'], mean=params['mean'], std=params['std'], out_dims=len(params['y_labels']))
     optimizer = optim.Adam(model.parameters(), lr=LR, weight_decay=WD)
     criterion = nn.MSELoss(reduction='none')
 
     _, _, val_r2_scores = train(model, optimizer, criterion, cal_loader, val_loader, 
-                                     num_epochs=params['num_epochs'], early_stop=False, plot_fig=False,save_path=None)
+                                     num_epochs=500, early_stop=False, plot_fig=False,save_path=None)
 
 
     criteria=None
@@ -79,8 +76,7 @@ def objective(trial, params):
 
 
 if __name__ == "__main__":
-    pr = cProfile.Profile()
-    pr.enable()
+   
     
     data_path ="./data/dataset/ossl/ossl_all_L1_v1.2.csv"
      
@@ -133,7 +129,7 @@ if __name__ == "__main__":
             "seed": params['seed']  
         }
         study = optuna.create_study(direction="maximize")
-        study.optimize(lambda trial: objective(trial, params_dict), n_trials=30)
+        study.optimize(lambda trial: objective(trial, params_dict), n_trials=50)
         
         best_trial = study.best_trial
         best_value = best_trial.value
@@ -162,15 +158,7 @@ if __name__ == "__main__":
 
 
 
-    pr.disable()
-
-    # Create a Stats object and print the results
-    s = io.StringIO()
-    sortby = pstats.SortKey.CUMULATIVE
-    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
-    ps.print_stats()
-
-    print(s.getvalue())
+   
 
 
 
