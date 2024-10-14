@@ -18,7 +18,7 @@ import json
 
 def objective(trial, params):
     # Hyperparameter suggestions
-    LR = trial.suggest_float("lr", 1e-5, 1e-1, log=True)
+    LR = trial.suggest_float("lr", 1e-5, 1e-2, log=True)
     WD = trial.suggest_float("weight_decay", 1e-4, 1e-2, log=True)
 
     # Data augmentation parameters to be optimized
@@ -26,7 +26,8 @@ def objective(trial, params):
     offset = trial.suggest_float("offset", 0.0, 0.3)
     noise = trial.suggest_float("noise", 0.0, 0.3)
     shift = trial.suggest_float("shift", 0.0, 0.3)
-    DP =trial.suggest_float("dropout", 0.0, 0.75)
+    # 
+    DP=0.5
                  
 
     # Apply augmentation to the dataset using the suggested parameters
@@ -60,7 +61,7 @@ def objective(trial, params):
     criterion = nn.MSELoss(reduction='none')
 
     _, _, val_r2_scores = train(model, optimizer, criterion, cal_loader, val_loader, 
-                                     num_epochs=params['num_epochs'], early_stop=False, plot_fig=False,save_path=None)
+                                     num_epochs=300, early_stop=False, plot_fig=False,save_path=None)
 
     criteria=None
     flattened = [item for sublist in val_r2_scores for item in sublist]
@@ -86,8 +87,11 @@ if __name__ == "__main__":
     with open(param_file,'r') as f:  
         params_dict = json.load(f)
     
-    for param_set in params_dict:
+    for i,param_set in enumerate( params_dict):
         params = param_set
+        if i<3:
+            continue
+        
 
         torch.manual_seed(params['seed'])
         if torch.cuda.is_available():
@@ -130,31 +134,41 @@ if __name__ == "__main__":
             "seed": params['seed']  
         }
         study = optuna.create_study(direction="maximize")
-        study.optimize(lambda trial: objective(trial, params_dict), n_trials=4)
+        study.optimize(lambda trial: objective(trial, params_dict), n_trials=30)
         
-        best_trial = study.best_trial
-        best_value = best_trial.value
-        if best_value < 1:
-            best_params = best_trial.params
-        else:
-            sorted_trials = sorted(study.trials, key=lambda t: t.value if t.value is not None else float('inf'))
-            second_best_trial = None
-            for trial in sorted_trials:
-                if trial.value is not None and trial.value < 1:
-                    second_best_trial = trial
-                    best_params = second_best_trial.params
-                    break
+        sorted_trials = sorted(study.trials, key=lambda t: t.value if t.value is not None else float('inf'))
+        
+        # best_trial = study.best_trial
+        # best_value = best_trial.value
+        # if best_value < 1:
+        #     best_params = best_trial.params
+        # else:
+        #     sorted_trials = sorted(study.trials, key=lambda t: t.value if t.value is not None else float('inf'))
+        #     second_best_trial = None
+        #     for trial in sorted_trials:
+        #         if trial.value is not None and trial.value < 1:
+        #             second_best_trial = trial
+        #             best_params = second_best_trial.params
+        #             break
 
-        print("Best hyperparameters: ", study.best_params)
+        # print("Best hyperparameters: ", study.best_params)
         
         params_path = os.path.dirname(params['data_path'])+f"/optimize_models/{params['dataset_type']}/{params['model_name']}/{labs}"
         if not os.path.exists(params_path):
                 os.makedirs(params_path)
         
             
-        with open((params_path+'/best_params.text'), 'w') as f:
-            for key, value in best_params.items():
-                f.write(f"{key}: {value}\n")
+        # with open((params_path+'/best_params.text'), 'w') as f:
+        #     for key, value in best_params.items():
+        #         f.write(f"{key}: {value}\n")
+
+            
+        with open((params_path+'/params.text'), 'w') as f:
+            for tr in sorted_trials:
+                for key, value in (tr.params).items():
+                    f.write(f"{key}: {value}\n")
+                f.write(f"res={tr.value}\n")
+                f.write(f"\n")
 
 
 
