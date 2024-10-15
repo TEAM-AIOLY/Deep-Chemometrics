@@ -4,7 +4,7 @@ import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader, random_split
 
-from net.base_net import ResNet101_1D
+from net.base_net import ResNet34_1D
 from data.load_dataset import SoilSpectralDataSet
 from utils.training import train
 from utils.misc import data_augmentation
@@ -22,15 +22,15 @@ def objective(trial, params):
     WD = trial.suggest_float("weight_decay", 1e-4, 1e-2, log=True)
 
     # Data augmentation parameters to be optimized
-    # slope = trial.suggest_float("slope", 0.0, 0.3)
-    # offset = trial.suggest_float("offset", 0.0, 0.3)
-    # noise = trial.suggest_float("noise", 0.0, 0.3)
-    # shift = trial.suggest_float("shift", 0.0, 0.3)
+    slope = trial.suggest_float("slope", 0.0, 0.3)
+    offset = trial.suggest_float("offset", 0.0, 0.3)
+    noise = trial.suggest_float("noise", 0.0, 0.3)
+    shift = trial.suggest_float("shift", 0.0, 0.3)
     
     # DP =trial.suggest_float("dropout", 0.0, 0.75)
     # IP =trial.suggest_int("inplanes", 4, 32)
     
-    slope = 0.1, offset = 0.1, noise = 0.1, shift = 0.1
+    # slope = 0.1, offset = 0.1, noise = 0.1, shift = 0.1
     DP=0.5
     IP=8
 
@@ -58,12 +58,12 @@ def objective(trial, params):
 
 
     # Model, optimizer, and training
-    model = ResNet101_1D(mean=params['mean'], std=params['std'], out_dims=len(params['y_labels']),dropout=DP, inplanes=IP)
+    model = ResNet34_1D(mean=params['mean'], std=params['std'], out_dims=len(params['y_labels']),dropout=DP, inplanes=IP)
     optimizer = optim.Adam(model.parameters(), lr=LR, weight_decay=WD)
     criterion = nn.MSELoss(reduction='none')
 
     _, _, val_r2_scores = train(model, optimizer, criterion, cal_loader, val_loader, 
-                                     num_epochs=params['num_epochs'], early_stop=False, plot_fig=False,save_path=None)
+                                     num_epochs=300, early_stop=False, plot_fig=False,save_path=None)
 
     criteria=None
     flattened = [item for sublist in val_r2_scores for item in sublist]
@@ -84,7 +84,7 @@ if __name__ == "__main__":
     
     data_path ="./data/dataset/ossl/ossl_all_L1_v1.2.csv"
      
-    param_file = os.path.dirname(data_path)+ '/optuna_params/optuna_ResNet101_params_mir.json'
+    param_file = os.path.dirname(data_path)+ '/optuna_params/optuna_ResNet34_params_mir.json'
     
     with open(param_file,'r') as f:  
         params_dict = json.load(f)
@@ -133,7 +133,7 @@ if __name__ == "__main__":
             "seed": params['seed']  
         }
         study = optuna.create_study(direction="maximize")
-        study.optimize(lambda trial: objective(trial, params_dict), n_trials=100)
+        study.optimize(lambda trial: objective(trial, params_dict), n_trials=25)
         
         best_trial = study.best_trial
         best_value = best_trial.value
