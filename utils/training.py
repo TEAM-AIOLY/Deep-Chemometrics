@@ -57,6 +57,12 @@ def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, sav
     val_r2_scores = []
     val_f1_scores = []
     
+    if classification :
+        min_val_loss = np.inf
+    else :
+        min_val_loss = [0]
+
+    
 
     for epoch in range(num_epochs):
         model.train()

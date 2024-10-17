@@ -51,10 +51,13 @@ if __name__ == "__main__":
     TL=8
     HDS=8
     MLP=16
+    Epoch=100
 
     
     for i,param_set in enumerate(params_dict):
-      
+        if i>3:
+            continue
+        
         params = param_set
         if len(params['y_labels'])>1:
             continue
@@ -120,7 +123,7 @@ if __name__ == "__main__":
         criterion = nn.MSELoss(reduction='none')
 
         train_losses, val_losses, val_r2_scores , final_save_path = train(model, optimizer, criterion, cal_loader, val_loader, 
-                                        num_epochs=300, early_stop=False, plot_fig=False,save_path=save_path)
+                                        num_epochs=Epoch, early_stop=False, plot_fig=False,save_path=save_path)
 
 
         tl = torch.stack(train_losses).numpy()
