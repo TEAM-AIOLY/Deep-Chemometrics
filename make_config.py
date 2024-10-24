@@ -3,7 +3,7 @@ import os
 import numpy as np
 
 N = 50
-network = "ResNet101"
+network = "ViT1D"
 
 
 # Standard part of the configuration that remains constant
@@ -11,31 +11,32 @@ standard = {
     "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
     "dataset_type": "mir",
     "y_labels": [ "oc_usda.c729_w.pct","na.ext_usda.a726_cmolc.kg",  "clay.tot_usda.a334_w.pct",  "k.ext_usda.a725_cmolc.kg",  "ph.h2o_usda.a268_index"],
-    "batch_size": 1024
+    "batch_size": 1024,
+    "network" : network
 }
 
 config = {
-    "learning_rate": ("log", 1e-5, 1e-3), 
-    "weight_decay": ("log", 1e-4, 0.01),   
+    "LR": ("log", 1e-5, 1e-3), 
+    "WD": ("log", 1e-4, 0.01),   
     "slope": ("uniform", 0.1, 0.3),        
     "offset": ("uniform", 0.1, 0.3),      
     "noise": ("uniform", 0.001, 0.01),     
     "shift": ("uniform", 0.01, 0.1),       
-    "epochs": ("int", 200, 1000,50)      
+    "EPOCHS": ("int", 200, 1000,50)      
 }
 
 if "ViT1D" in network:
     config.update({
-        "patch_size": ("int", 32, 64, 2),     
-        "dim_embedding": ("int", 8, 32, 2),    
-        "token_length": ("int", 4, 16, 2),     
-        "hidden_dim_size": ("int", 4, 16, 2),  
-        "mlp_size": ("int", 8, 32, 2)          
+        "PS": ("int", 32, 64, 2),     
+        "DE": ("int", 8, 32, 2),    
+        "TL": ("int", 4, 16, 2),     
+        "HDS": ("int", 4, 16, 2),  
+        "MLP": ("int", 8, 32, 2)          
     })
     
 elif "ResNet" in network or "DeepSpectra" in network:
     config.update({
-        "dropout": ("uniform", 0.1, 0.5)       
+        "DP": ("uniform", 0.1, 0.5)       
     })
 
 
@@ -55,6 +56,7 @@ for i in range(N):
     params = {}
     
     params.update(standard)
+    params['ID'] =f"ID_{i:03d}"
     
     for param, config_value  in config.items():
         draw_type = config_value[0]

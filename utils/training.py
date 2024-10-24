@@ -44,7 +44,7 @@ class EarlyStopping:
             
             
 ###############################################################################
-def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, save_path=None, save_interval=10,early_stop=True,classification = False, plot_fig=True):
+def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, save_path=None,early_stop=False,classification = False, plot_fig=False):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.to(device)
     
@@ -145,22 +145,22 @@ def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, sav
             if early_stopping.early_stop:
                 break
         
-          # save best model via validation loss and 30% of total epochs , and save path with best name
+          # save best model via validation loss and 10% of total epochs , and save path with best name
         #update the min_val_loss
-
-        if classification:
-            if save_path and val_loss.mean() < min_val_loss and (epoch + 1) > num_epochs*0.1 :
-                min_val_loss = val_loss.mean()
-                final_save_path = save_path + f'_final.pth'
-                torch.save(model.state_dict(), final_save_path)
-                print(f'Model saved at epoch {epoch + 1} to {final_save_path}')
-        else :
-            val = np.array(r2_scores)
-            if save_path and (val.mean() > min_val_loss) and (val.mean() < 1.5) and (epoch + 1) > num_epochs*0.1  :
-                min_val_loss = val.mean()
-                final_save_path = save_path + f'_final.pth'
-                torch.save(model.state_dict(), final_save_path)
-                print(f'Model saved at epoch {epoch + 1} to {final_save_path}')
+        if save_path and  not early_stopping.early_stop:
+            if classification:
+                if val_loss.mean() < min_val_loss and (epoch + 1) > num_epochs*0.1 :
+                    min_val_loss = val_loss.mean()
+                    final_save_path = save_path + f'_final.pth'
+                    torch.save(model.state_dict(), final_save_path)
+                    print(f'Model saved at epoch {epoch + 1} to {final_save_path}')
+            else :
+                val = np.array(r2_scores)
+                if (val.mean() > min_val_loss) and (val.mean() < 1.5) and (epoch + 1) > num_epochs*0.1  :
+                    min_val_loss = val.mean()
+                    final_save_path = save_path + f"/best_model_epoch{epoch}_.pth"
+                    torch.save(model.state_dict(), final_save_path)
+                    print(f'Model saved at epoch {epoch + 1} to {final_save_path}')
 
 
     train_losses_np = [loss.numpy() for loss in train_losses]

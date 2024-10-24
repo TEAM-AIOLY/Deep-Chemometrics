@@ -68,6 +68,7 @@ if __name__ == "__main__":
     
     augmentation = data_augmentation(slope=params['slope'], offset=params['offset'], noise=params['noise'], shift=params['shift'])
     spectral_data = SoilSpectralDataSet(data_path=params['data_path'], dataset_type=params['dataset_type'], y_labels=params['y_labels'],preprocessing=None)
+    params['spec_dims'] = spectral_data.spec_dims
     
     dataset_size = len(spectral_data)
     test_size = int(0.2 * dataset_size)
@@ -80,14 +81,70 @@ if __name__ == "__main__":
     print(val_size)
 
 
-    # train_dataset, test_dataset = random_split(spectral_data, [train_size, test_size], 
-    #                                             generator=torch.Generator().manual_seed(params['seed']))
-    # cal_dataset, val_dataset = random_split(train_dataset, [cal_size, val_size], 
-    #                                         generator=torch.Generator().manual_seed(params['seed']))
+    train_dataset, test_dataset = random_split(spectral_data, [train_size, test_size], 
+                                                generator=torch.Generator().manual_seed(seed))
+    cal_dataset, val_dataset = random_split(train_dataset, [cal_size, val_size], 
+                                            generator=torch.Generator().manual_seed(seed))
     
-    # cal_dataset.dataset.preprocessing=augmentation
+    cal_dataset.dataset.preprocessing=augmentation
 
-    # # Create data loaders
-    # cal_loader = DataLoader(cal_dataset, batch_size=params['batch_size'], shuffle=True, num_workers=0)
-    # val_loader = DataLoader(val_dataset, batch_size=params['batch_size'], shuffle=False, num_workers=0)
-    # test_loader= DataLoader(test_dataset,batch_size=params['batch_size'], shuffle=False, num_workers=0)
+    # Create data loaders
+    cal_loader = DataLoader(cal_dataset, batch_size=params['batch_size'], shuffle=True, num_workers=0)
+    val_loader = DataLoader(val_dataset, batch_size=params['batch_size'], shuffle=False, num_workers=0)
+    test_loader= DataLoader(test_dataset,batch_size=params['batch_size'], shuffle=False, num_workers=0)
+    
+    mean = torch.zeros(params['spec_dims'])
+    std = torch.zeros(params['spec_dims'])
+        
+    for inputs, _ in cal_loader:
+        mean += inputs.sum(dim=0)
+
+    mean /= len(cal_loader.dataset)
+
+    # Calculate std over the training dataset
+    for inputs, _ in cal_loader:
+        std += ((inputs - mean) ** 2).sum(dim=0)
+
+    std = torch.sqrt(std / len(cal_loader.dataset))
+    
+    params['mean'] = mean
+    params['std'] = std
+
+
+    # Model, optimizer, and training
+    model=ViT_1D(mean = params['mean'], std = params['std'], seq_len = params['spec_dims'], patch_size = params['PS'], 
+                dim_embed = params['DE'], trans_layers = params['TL'], heads = params['HDS'], mlp_dim = params['MLP'], out_dims = len(params['y_labels']) )
+    
+    optimizer = optim.Adam(model.parameters(), lr=params['LR'], weight_decay=params['WD'])
+    criterion = nn.MSELoss(reduction='none')
+
+
+    base_path =os.path.dirname(params['data_path'])+f"/model_benchmark/{params['network']}/run_{params['ID']}"
+    os.makedirs(base_path, exist_ok=True)
+
+    train_losses, val_losses, val_r2_scores,model_path  = train(model, optimizer, criterion, cal_loader, val_loader, 
+                                    num_epochs=params['EPOCHS'],save_path=base_path)
+
+
+    tl = torch.stack(train_losses).numpy()
+    vl = torch.stack(val_losses).numpy()
+    r2= np.array(val_r2_scores)
+    
+    results = {
+    "params": params,  
+    "model_path": model_path,
+    "train_losses": train_losses,  
+    "val_losses": val_losses,  
+    "val_r2_scores": val_r2_scores  
+    }
+    
+    results_path= base_path+'/results.json'
+    with open(results_path, 'w') as json_file:
+        json.dump(results, json_file, indent=4)
+
+    print(f"Results saved to {results_path}")
+
+    
+    
+
+    
