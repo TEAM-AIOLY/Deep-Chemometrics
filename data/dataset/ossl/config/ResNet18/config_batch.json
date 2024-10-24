@@ -1,0 +1,1002 @@
+[
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 4e-05,
+        "weight_decay": 0.004,
+        "slope": 0.2,
+        "offset": 0.1,
+        "noise": 0.005,
+        "shift": 0.03,
+        "epochs": 750,
+        "dropout": 0.4
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 2e-05,
+        "weight_decay": 0.0013,
+        "slope": 0.1,
+        "offset": 0.1,
+        "noise": 0.006,
+        "shift": 0.06,
+        "epochs": 200,
+        "dropout": 0.2
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 0.00025,
+        "weight_decay": 0.0045,
+        "slope": 0.1,
+        "offset": 0.1,
+        "noise": 0.005,
+        "shift": 0.03,
+        "epochs": 650,
+        "dropout": 0.2
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 1e-05,
+        "weight_decay": 0.0015,
+        "slope": 0.1,
+        "offset": 0.3,
+        "noise": 0.007,
+        "shift": 0.07,
+        "epochs": 550,
+        "dropout": 0.1
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 2e-05,
+        "weight_decay": 0.0001,
+        "slope": 0.3,
+        "offset": 0.3,
+        "noise": 0.008,
+        "shift": 0.1,
+        "epochs": 950,
+        "dropout": 0.1
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 0.00093,
+        "weight_decay": 0.0007,
+        "slope": 0.2,
+        "offset": 0.2,
+        "noise": 0.001,
+        "shift": 0.06,
+        "epochs": 550,
+        "dropout": 0.4
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 0.00026,
+        "weight_decay": 0.0092,
+        "slope": 0.3,
+        "offset": 0.2,
+        "noise": 0.001,
+        "shift": 0.09,
+        "epochs": 850,
+        "dropout": 0.5
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 3e-05,
+        "weight_decay": 0.0001,
+        "slope": 0.2,
+        "offset": 0.1,
+        "noise": 0.003,
+        "shift": 0.09,
+        "epochs": 550,
+        "dropout": 0.4
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 4e-05,
+        "weight_decay": 0.0003,
+        "slope": 0.2,
+        "offset": 0.3,
+        "noise": 0.002,
+        "shift": 0.1,
+        "epochs": 450,
+        "dropout": 0.3
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 5e-05,
+        "weight_decay": 0.0005,
+        "slope": 0.2,
+        "offset": 0.2,
+        "noise": 0.006,
+        "shift": 0.03,
+        "epochs": 800,
+        "dropout": 0.4
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 0.00015,
+        "weight_decay": 0.0098,
+        "slope": 0.1,
+        "offset": 0.2,
+        "noise": 0.003,
+        "shift": 0.09,
+        "epochs": 500,
+        "dropout": 0.2
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 6e-05,
+        "weight_decay": 0.0015,
+        "slope": 0.1,
+        "offset": 0.3,
+        "noise": 0.005,
+        "shift": 0.1,
+        "epochs": 800,
+        "dropout": 0.5
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 0.00014,
+        "weight_decay": 0.0026,
+        "slope": 0.2,
+        "offset": 0.2,
+        "noise": 0.004,
+        "shift": 0.06,
+        "epochs": 350,
+        "dropout": 0.3
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 0.00012,
+        "weight_decay": 0.0011,
+        "slope": 0.2,
+        "offset": 0.3,
+        "noise": 0.002,
+        "shift": 0.08,
+        "epochs": 600,
+        "dropout": 0.3
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 0.0006,
+        "weight_decay": 0.0002,
+        "slope": 0.2,
+        "offset": 0.2,
+        "noise": 0.004,
+        "shift": 0.03,
+        "epochs": 650,
+        "dropout": 0.3
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 0.00067,
+        "weight_decay": 0.0052,
+        "slope": 0.1,
+        "offset": 0.2,
+        "noise": 0.005,
+        "shift": 0.1,
+        "epochs": 700,
+        "dropout": 0.4
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 7e-05,
+        "weight_decay": 0.004,
+        "slope": 0.2,
+        "offset": 0.1,
+        "noise": 0.009,
+        "shift": 0.08,
+        "epochs": 350,
+        "dropout": 0.2
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 3e-05,
+        "weight_decay": 0.0022,
+        "slope": 0.1,
+        "offset": 0.2,
+        "noise": 0.007,
+        "shift": 0.1,
+        "epochs": 450,
+        "dropout": 0.4
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 0.0004,
+        "weight_decay": 0.0004,
+        "slope": 0.3,
+        "offset": 0.2,
+        "noise": 0.003,
+        "shift": 0.1,
+        "epochs": 600,
+        "dropout": 0.2
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 4e-05,
+        "weight_decay": 0.0028,
+        "slope": 0.2,
+        "offset": 0.1,
+        "noise": 0.001,
+        "shift": 0.09,
+        "epochs": 950,
+        "dropout": 0.1
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 0.00016,
+        "weight_decay": 0.0001,
+        "slope": 0.1,
+        "offset": 0.2,
+        "noise": 0.006,
+        "shift": 0.07,
+        "epochs": 250,
+        "dropout": 0.2
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 4e-05,
+        "weight_decay": 0.001,
+        "slope": 0.2,
+        "offset": 0.2,
+        "noise": 0.01,
+        "shift": 0.08,
+        "epochs": 850,
+        "dropout": 0.2
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 0.00086,
+        "weight_decay": 0.0002,
+        "slope": 0.2,
+        "offset": 0.2,
+        "noise": 0.008,
+        "shift": 0.05,
+        "epochs": 450,
+        "dropout": 0.3
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 5e-05,
+        "weight_decay": 0.0036,
+        "slope": 0.2,
+        "offset": 0.3,
+        "noise": 0.001,
+        "shift": 0.05,
+        "epochs": 250,
+        "dropout": 0.1
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 7e-05,
+        "weight_decay": 0.0004,
+        "slope": 0.2,
+        "offset": 0.2,
+        "noise": 0.008,
+        "shift": 0.01,
+        "epochs": 300,
+        "dropout": 0.3
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 4e-05,
+        "weight_decay": 0.003,
+        "slope": 0.3,
+        "offset": 0.1,
+        "noise": 0.005,
+        "shift": 0.07,
+        "epochs": 900,
+        "dropout": 0.4
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 0.0005,
+        "weight_decay": 0.0002,
+        "slope": 0.1,
+        "offset": 0.3,
+        "noise": 0.008,
+        "shift": 0.03,
+        "epochs": 250,
+        "dropout": 0.5
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 0.00025,
+        "weight_decay": 0.0011,
+        "slope": 0.1,
+        "offset": 0.2,
+        "noise": 0.003,
+        "shift": 0.08,
+        "epochs": 950,
+        "dropout": 0.4
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 1e-05,
+        "weight_decay": 0.0007,
+        "slope": 0.1,
+        "offset": 0.2,
+        "noise": 0.005,
+        "shift": 0.06,
+        "epochs": 450,
+        "dropout": 0.3
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 1e-05,
+        "weight_decay": 0.0037,
+        "slope": 0.1,
+        "offset": 0.2,
+        "noise": 0.003,
+        "shift": 0.04,
+        "epochs": 300,
+        "dropout": 0.4
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 7e-05,
+        "weight_decay": 0.0005,
+        "slope": 0.2,
+        "offset": 0.1,
+        "noise": 0.006,
+        "shift": 0.07,
+        "epochs": 300,
+        "dropout": 0.4
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 7e-05,
+        "weight_decay": 0.0002,
+        "slope": 0.2,
+        "offset": 0.1,
+        "noise": 0.005,
+        "shift": 0.02,
+        "epochs": 400,
+        "dropout": 0.1
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 0.00035,
+        "weight_decay": 0.0001,
+        "slope": 0.2,
+        "offset": 0.3,
+        "noise": 0.001,
+        "shift": 0.02,
+        "epochs": 200,
+        "dropout": 0.1
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 0.00038,
+        "weight_decay": 0.0099,
+        "slope": 0.2,
+        "offset": 0.1,
+        "noise": 0.002,
+        "shift": 0.02,
+        "epochs": 700,
+        "dropout": 0.4
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 1e-05,
+        "weight_decay": 0.0002,
+        "slope": 0.1,
+        "offset": 0.2,
+        "noise": 0.001,
+        "shift": 0.09,
+        "epochs": 350,
+        "dropout": 0.3
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 1e-05,
+        "weight_decay": 0.0024,
+        "slope": 0.2,
+        "offset": 0.3,
+        "noise": 0.007,
+        "shift": 0.05,
+        "epochs": 300,
+        "dropout": 0.2
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 8e-05,
+        "weight_decay": 0.0002,
+        "slope": 0.3,
+        "offset": 0.2,
+        "noise": 0.002,
+        "shift": 0.03,
+        "epochs": 450,
+        "dropout": 0.3
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 0.00015,
+        "weight_decay": 0.0009,
+        "slope": 0.3,
+        "offset": 0.2,
+        "noise": 0.005,
+        "shift": 0.09,
+        "epochs": 500,
+        "dropout": 0.3
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 5e-05,
+        "weight_decay": 0.0001,
+        "slope": 0.3,
+        "offset": 0.3,
+        "noise": 0.007,
+        "shift": 0.09,
+        "epochs": 850,
+        "dropout": 0.1
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 2e-05,
+        "weight_decay": 0.0013,
+        "slope": 0.3,
+        "offset": 0.3,
+        "noise": 0.01,
+        "shift": 0.06,
+        "epochs": 500,
+        "dropout": 0.1
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 5e-05,
+        "weight_decay": 0.001,
+        "slope": 0.2,
+        "offset": 0.3,
+        "noise": 0.004,
+        "shift": 0.05,
+        "epochs": 500,
+        "dropout": 0.5
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 3e-05,
+        "weight_decay": 0.0048,
+        "slope": 0.2,
+        "offset": 0.2,
+        "noise": 0.004,
+        "shift": 0.07,
+        "epochs": 500,
+        "dropout": 0.1
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 1e-05,
+        "weight_decay": 0.0016,
+        "slope": 0.1,
+        "offset": 0.2,
+        "noise": 0.009,
+        "shift": 0.1,
+        "epochs": 750,
+        "dropout": 0.4
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 2e-05,
+        "weight_decay": 0.006,
+        "slope": 0.3,
+        "offset": 0.2,
+        "noise": 0.006,
+        "shift": 0.02,
+        "epochs": 600,
+        "dropout": 0.2
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0038,
+        "slope": 0.1,
+        "offset": 0.3,
+        "noise": 0.006,
+        "shift": 0.06,
+        "epochs": 400,
+        "dropout": 0.2
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 2e-05,
+        "weight_decay": 0.0002,
+        "slope": 0.1,
+        "offset": 0.2,
+        "noise": 0.001,
+        "shift": 0.03,
+        "epochs": 300,
+        "dropout": 0.3
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 0.00086,
+        "weight_decay": 0.0056,
+        "slope": 0.1,
+        "offset": 0.3,
+        "noise": 0.002,
+        "shift": 0.07,
+        "epochs": 400,
+        "dropout": 0.3
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 0.0004,
+        "weight_decay": 0.0002,
+        "slope": 0.2,
+        "offset": 0.3,
+        "noise": 0.004,
+        "shift": 0.08,
+        "epochs": 650,
+        "dropout": 0.2
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 0.00058,
+        "weight_decay": 0.0057,
+        "slope": 0.2,
+        "offset": 0.1,
+        "noise": 0.009,
+        "shift": 0.04,
+        "epochs": 550,
+        "dropout": 0.4
+    },
+    {
+        "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
+        "dataset_type": "mir",
+        "y_labels": [
+            "oc_usda.c729_w.pct",
+            "na.ext_usda.a726_cmolc.kg",
+            "clay.tot_usda.a334_w.pct",
+            "k.ext_usda.a725_cmolc.kg",
+            "ph.h2o_usda.a268_index"
+        ],
+        "batch_size": 1024,
+        "learning_rate": 2e-05,
+        "weight_decay": 0.0005,
+        "slope": 0.2,
+        "offset": 0.2,
+        "noise": 0.004,
+        "shift": 0.04,
+        "epochs": 550,
+        "dropout": 0.2
+    }
+]

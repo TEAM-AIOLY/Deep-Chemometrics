@@ -3,14 +3,14 @@ import os
 import numpy as np
 
 N = 50
-network = "ViT1D"
+network = "ResNet101"
 
 
 # Standard part of the configuration that remains constant
 standard = {
     "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",
     "dataset_type": "mir",
-    "y_labels": [  "oc_usda.c729_w.pct","na.ext_usda.a726_cmolc.kg",  "clay.tot_usda.a334_w.pct",  "k.ext_usda.a725_cmolc.kg",  "ph.h2o_usda.a268_index"],
+    "y_labels": [ "oc_usda.c729_w.pct","na.ext_usda.a726_cmolc.kg",  "clay.tot_usda.a334_w.pct",  "k.ext_usda.a725_cmolc.kg",  "ph.h2o_usda.a268_index"],
     "batch_size": 1024
 }
 
