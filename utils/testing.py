@@ -47,7 +47,7 @@ def test(model, model_path, test_loader,device = "cuda") :
         for inputs, targets in test_loader:
             Y += targets.to("cpu")
             inputs = inputs.to(device,non_blocking=True).float()
-            outputs = model(inputs[:,None])
+            outputs = model(inputs[:,None],dp = False)
             y_pred += outputs.to("cpu")
 
 

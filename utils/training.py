@@ -130,7 +130,7 @@ def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, sav
         if not classification:
 
             R2 = [torcheval.metrics.R2Score() for _ in range(model.out_dims)]
-            for i in range(loss.shape[0]):
+            for i in range(model.out_dims):
                 R2[i].update(all_targets[:, i], all_outputs[:, i])
                 r2_score = R2[i].compute().item()
                 r2_scores.append(r2_score)
@@ -313,13 +313,15 @@ def train_optuna(model, optimizer, criterion, train_loader, val_loader, schedule
         if not classification:
 
             R2 = [torcheval.metrics.R2Score() for _ in range(model.out_dims)]
-            for i in range(loss.shape[0]):
+            for i in range(len(R2)):
                 R2[i].update(all_targets[:, i], all_outputs[:, i])
                 r2_score = R2[i].compute().item()
                 r2_scores.append(r2_score)
 
             val_r2_scores.append(r2_scores)
-            metric = r2_scores
+            metric = np.mean(np.stack(r2_scores,axis = 0),axis = 0)
+            print(metric)
+
         else:
 
             F1 = torcheval.metrics.MulticlassF1Score()
