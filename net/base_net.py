@@ -5,6 +5,75 @@ import torch
 from torch import nn
 from einops import rearrange, repeat, pack, unpack
 from einops.layers.torch import Rearrange
+from torchvision.ops.misc import SqueezeExcitation
+
+from mambular.base_models import BaseModel
+import torch
+import torch.nn
+
+class RNN(nn.Module):
+    def __init__(self, input_dims, mean, std, hidden_dim_lstm = 2048, num_layers_lstm = 1, dropout_lstm = 0.2, out_dims = 1, bidirectional=True, num_fc = 1, out_dims_per_fc = (1), dropout_fc = (0.0)):
+        super(RNN, self).__init__()
+        self.input_dims = input_dims
+        self.mean = nn.Parameter(torch.tensor(mean).float(),requires_grad=False)
+        self.std = nn.Parameter(torch.tensor(std).float(),requires_grad=False)
+        self.out_dims = out_dims
+        self.dropout_lstm = dropout_lstm
+        self.hidden_dim_lstm = hidden_dim_lstm
+        self.num_layers_lstm = num_layers_lstm
+        self.bidirectional = bidirectional
+        if self.bidirectional:
+            self.d = 2
+        else:
+            self.d = 1
+        self.model = nn.Sequential()
+        self.sqz = SqueezeExcitation(self.input_dims,self.input_dims)
+        self.lstm = nn.LSTM(self.input_dims, self.hidden_dim_lstm, dropout=self.dropout_lstm, bidirectional=self.bidirectional, num_layers=self.num_layers_lstm, batch_first=True)
+        # self.fc = nn.Linear(self.d*self.hidden_dim_lstm, self.out_dims)
+        self.out_dims_per_fc  = out_dims_per_fc
+        self.num_fc = num_fc
+        self.dropout_fc = dropout_fc
+        self.fc = []
+        out_dim_fc = self.d*self.hidden_dim_lstm
+        for i in range(0,self.num_fc-1):
+            self.fc.append(nn.Linear(out_dim_fc, self.out_dims_per_fc[i]))
+            out_dim_fc = self.out_dims_per_fc[i]
+        self.fc.append(nn.Linear(out_dim_fc, self.out_dims))
+    def forward(self, x):
+        # Reshape input
+        x = (x-self.mean)/self.std
+        # # print(x.shape)
+        # x = x[:,:,None,:]
+        # # print(x.shape)
+        # x = torch.permute(x,[0,3,2,1])
+        # # print(x.shape)
+        # x = self.sqz(x)
+        # # print(x.shape)
+        # x = torch.permute(x,[0,2,3,1])
+        # x = torch.squeeze(x,dim=2)
+        
+        # Initialize the hidden state
+        h0 = torch.zeros(self.d * self.num_layers_lstm, x.size(0), self.hidden_dim_lstm).to(x.device)
+        
+        # Initialize the cell state 
+        c0 = torch.zeros(self.d * self.num_layers_lstm, x.size(0), self.hidden_dim_lstm).to(x.device)
+        
+        # Pass the input through the LSTM layer
+        out1, _ = self.lstm(x, (h0, c0))
+        
+        # Get the last output of the LSTM layer
+        out1 = out1[:,-1]
+        # out1 = F.dropout(out1, p=self.dropout_lstm, training=self.training)
+        
+        # Pass the output through the fully connected layer
+        # out = self.fc(out1)
+
+        out = out1
+        for i in range(0,self.num_fc):
+            self.fc[i] = self.fc[i].to(x.device)
+            out = F.elu(self.fc[i](out))
+            out = F.dropout(out, p=self.dropout_fc[i], training=self.training)
+        return out
 
 class CuiNet(nn.Module):
     def __init__(self, input_dims, mean,std,dropout=0.2,out_dims=1):
