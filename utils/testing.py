@@ -63,7 +63,7 @@ def test(model, model_path, test_loader,device = "cuda") :
     # Plot of the 45 degree line
     plt.plot([Y.min()-1,Y.max()+1],[Y.min()-1,Y.max()+1],'r')
       
-    plt.text(0, 0.75*Y.max(), "CCC: %5.5f"%(ccc(Y,y_pred))+"\nR2: %5.5f"%(r2_score(Y,y_pred))+"\nRMSEP: %5.5f"%(RMSEP(Y,y_pred)),
+    plt.text(0.4 * Y.max(), 0.9 * Y.max(),  "CCC: %5.5f"%(ccc(Y,y_pred))+"\nR2: %5.5f"%(r2_score(Y,y_pred))+"\nRMSEP: %5.5f"%(RMSEP(Y,y_pred)),
              fontsize=16, bbox=dict(facecolor='white', alpha=0.5))
 
     
