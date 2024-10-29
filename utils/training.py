@@ -320,7 +320,6 @@ def train_optuna(model, optimizer, criterion, train_loader, val_loader, schedule
 
             val_r2_scores.append(r2_scores)
             metric = np.mean(np.stack(r2_scores,axis = 0),axis = 0)
-            print(metric)
 
         else:
 
@@ -352,10 +351,10 @@ def train_optuna(model, optimizer, criterion, train_loader, val_loader, schedule
         else:
             if trial is None:
                 print(
-                    f'Epoch {epoch + 1}/{num_epochs} | Train Losses: {train_loss_str} | Validation Losses: {val_loss_str} | R2 Scores: {r2_score_str} | LR: {optimizer.param_groups[0]["lr"] }')
+                    f'Epoch {epoch + 1}/{num_epochs} | Train Losses: {train_loss_str} | Validation Losses: {val_loss_str} | R2 Scores: {metric} | LR: {optimizer.param_groups[0]["lr"] }')
             else:
                 print(
-                    f'{dt} | Trial {trial.number} | Epoch {epoch + 1}/{num_epochs} | Train Losses: {train_loss_str} | Validation Losses: {val_loss_str} | R2 Scores: {r2_score_str} | LR: {optimizer.param_groups[0]["lr"] }')
+                    f'{dt} | Trial {trial.number} | Epoch {epoch + 1}/{num_epochs} | Train Losses: {train_loss_str} | Validation Losses: {val_loss_str} | R2 Scores: {metric} | LR: {optimizer.param_groups[0]["lr"] }')
 
         if save_path and (epoch + 1) % save_interval == 0:
             if trial is None:
@@ -366,6 +365,8 @@ def train_optuna(model, optimizer, criterion, train_loader, val_loader, schedule
             print(f'Model saved at epoch {epoch + 1} to {epoch_save_path}')
 
         if save_path and metric > best_metric:
+            print(f'New best metric: {metric}')
+            print(f'New best metric: {best_metric}')
             if trial is None:
                 best_save_path = save_path + f'_best.pth'
             else:
@@ -373,6 +374,7 @@ def train_optuna(model, optimizer, criterion, train_loader, val_loader, schedule
             best_metric = metric
             # torch.save(model, best_save_path)
             torch.save(model.state_dict(), best_save_path)
+            print(f'Model saved at epoch to {best_save_path}')
 
         metrics.append(metric)
         if trial is not None:
