@@ -6,12 +6,95 @@ from torch import nn
 from einops import rearrange, repeat, pack, unpack
 from einops.layers.torch import Rearrange
 
+
+class Darionet(nn.Module):
+    def __init__(self, mean, std, filter_size, reg_beta, input_dims, out_dims=1, p=0.1):
+        super(Darionet, self).__init__()
+
+        ## Dimensions of the input layer
+        self.input_dims = input_dims
+        self.mean = nn.Parameter(torch.tensor(mean).float(), requires_grad=False)
+        self.std = nn.Parameter(torch.tensor(std).float(), requires_grad=False)
+
+        ## Conv layer parameters
+        self.conv1d_dims = self.input_dims
+        self.k_number = 1
+        self.k_width = filter_size
+        self.k_stride = 1
+
+        ## Fully connected layers dimensions
+        self.fc1_dims = 128
+        self.fc2_dims = 64
+        self.fc3_dims = 16
+        self.out_dims = out_dims
+
+        ## L2 regularization (implemented later in the forward pass)
+        self.beta = reg_beta / 2.0
+
+        ## Convolutional layer
+        self.conv1 = nn.Conv1d(in_channels=1, out_channels=self.k_number, kernel_size=self.k_width,
+                               stride=self.k_stride, padding='same')
+
+        ## Fully connected layers
+        self.fc1 = nn.Linear(self.conv1d_dims, self.fc1_dims)
+        self.fc2 = nn.Linear(self.fc1_dims, self.fc2_dims)
+        self.fc3 = nn.Linear(self.fc2_dims, self.fc3_dims)
+        ## manual dropout layer
+        self.dropout = ManualDropout(p=p)
+        ## Output layer
+        self.output_layer = nn.Linear(self.fc3_dims, self.out_dims)
+
+        ## He initialization (Kaiming initialization in PyTorch)
+        self._initialize_weights()
+
+    def _initialize_weights(self):
+        """Apply He normal initialization to layers"""
+        for layer in self.modules():
+            if isinstance(layer, nn.Conv1d) or isinstance(layer, nn.Linear):
+                nn.init.kaiming_normal_(layer.weight, nonlinearity='relu')
+                if layer.bias is not None:
+                    nn.init.constant_(layer.bias, 0)
+
+    def forward(self, x,dp = True):
+        # Reshape input to (batch_size, 1, input_dims) for 1D convolution
+        x = (x - self.mean) / self.std
+
+        # Convolutional layer followed by ELU activation
+        x = F.elu(self.conv1(x))
+
+        # Flatten the tensor after convolution
+        x = x.view(x.size(0), -1)
+
+        # Fully connected layers with ELU activation
+        x = F.elu(self.fc1(x))
+        x = F.elu(self.fc2(x))
+        x = F.elu(self.fc3(x))
+        # Dropout layer
+        if dp :
+            x = self.dropout(x)
+        # Output layer with linear activation
+        output = self.output_layer(x)
+
+        # Return the final output
+        return output
+
+
+class ManualDropout(nn.Module):
+    def __init__(self, p=0.5):
+        super(ManualDropout, self).__init__()
+        self.p = p
+
+    def forward(self, x):
+        mask = (torch.rand_like(x) > self.p).float()
+        return x * mask / (1 - self.p)
+
+
 class CuiNet(nn.Module):
-    def __init__(self, input_dims, mean,std,dropout=0.2,out_dims=1):
+    def __init__(self, input_dims, mean, std, dropout=0.1, out_dims=1):
         super(CuiNet, self).__init__()
-        
+
         # Layers dimensions
-        self.conv1d_dims = input_dims-4         # size of spectrum - (kernel_size-1) is the size of the spectrum after first conv1D
+        self.conv1d_dims = input_dims - 4  # size of spectrum - (kernel_size-1) is the size of the spectrum after first conv1D
         self.k_number = 1
         self.k_width = 5
         self.k_stride = 1
@@ -19,48 +102,47 @@ class CuiNet(nn.Module):
         self.fc2_dims = 18
         self.fc3_dims = 12
         self.out_dims = out_dims
-        self.dropout=dropout
-        self.mean = nn.Parameter(torch.tensor(mean).float(),requires_grad=False)
-        self.std = nn.Parameter(torch.tensor(std).float(),requires_grad=False)
-        
+        self.dropout = ManualDropout(p=dropout)
+        self.mean = nn.Parameter(torch.tensor(mean).float(), requires_grad=False)
+        self.std = nn.Parameter(torch.tensor(std).float(), requires_grad=False)
+
         # Convolutional layer
-        self.conv1d = nn.Conv1d(1,1, kernel_size= 5 , stride=1)
-        
+        self.conv1d = nn.Conv1d(1, 1, kernel_size=5, stride=1)
+
         # Fully connected layers
         self.fc1 = nn.Linear(self.conv1d_dims, self.fc1_dims)
         self.fc2 = nn.Linear(self.fc1_dims, self.fc2_dims)
         self.fc3 = nn.Linear(self.fc2_dims, self.fc3_dims)
         self.out = nn.Linear(self.fc3_dims, self.out_dims)
-        
+
         # Initialize weights with He normal
         self._initialize_weights()
-        
+
     def _initialize_weights(self):
         for m in self.modules():
             if isinstance(m, nn.Conv1d) or isinstance(m, nn.Linear):
                 nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
                 if m.bias is not None:
                     nn.init.constant_(m.bias, 0)
-        
-    def forward(self, x):
+
+    def forward(self, x,dp = True):
         # Reshape input
-        x = (x-self.mean)/self.std
+        x = (x - self.mean) / self.std
         # Convolutional layer with ELU activation
         x = F.elu(self.conv1d(x))
-        
+
         # Flatten the output from conv1d
         x = x.view(x.size(0), -1)
-        
+
         # Fully connected layers with ELU activation
         x = F.elu(self.fc1(x))
         x = F.elu(self.fc2(x))
         x = F.elu(self.fc3(x))
-        x = F.dropout(x, p=self.dropout, training=self.training)
+        if dp:
+            x = self.dropout(x)
         # Output layer with linear activation
         x = self.out(x)
-        
         return x
-
 
 ###############################################################################   
     
