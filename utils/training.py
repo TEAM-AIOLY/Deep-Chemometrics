@@ -44,13 +44,10 @@ class EarlyStopping:
             
             
 ###############################################################################
-def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, save_path=None,early_stop=False,classification = False, plot_fig=False):
+def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, save_path=None,classification = False, plot_fig=False):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.to(device)
     
-        
- 
-    early_stopping = EarlyStopping(save_path=save_path) if early_stop and save_path else None
     
     train_losses = []
     val_losses = []
@@ -61,8 +58,6 @@ def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, sav
         min_val_loss = np.inf
     else :
         min_val_loss = [0]
-
-    
 
     for epoch in range(num_epochs):
         model.train()
@@ -140,14 +135,10 @@ def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, sav
         else :
             print(f'Epoch {epoch+1}/{num_epochs} | Train Losses: {train_loss_str} | Validation Losses: {val_loss_str} | R2 Scores: {r2_score_str}')
 
-        if early_stop:
-            early_stopping(val_loss.mean(), model, epoch + 1)
-            if early_stopping.early_stop:
-                break
         
           # save best model via validation loss and 10% of total epochs , and save path with best name
         #update the min_val_loss
-        if save_path and  not early_stopping.early_stop:
+        if save_path:
             if classification:
                 if val_loss.mean() < min_val_loss and (epoch + 1) > num_epochs*0.1 :
                     min_val_loss = val_loss.mean()
@@ -209,7 +200,6 @@ def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, sav
         fig.tight_layout()  # To prevent overlapping
 
         # Show the plot
-        plt.show(block=False)    
         # plt.close()
 
     if save_path:

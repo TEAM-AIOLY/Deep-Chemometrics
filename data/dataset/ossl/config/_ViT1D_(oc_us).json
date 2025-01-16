@@ -12,6 +12,10 @@
     "spec_dims": null,
     "mean": null,
     "std": null,
+    "slope": 0.2,
+    "offset": 0.2,
+    "noise": 0.002,
+    "shift": 0.05,
     "LR": 0.001,
     "WD": 0.0055,
     "PS": 32,
@@ -19,7 +23,7 @@
     "TL": 4,
     "HDS": 4,
     "MLP": 16,
-    "id": "Id_001"
+    "ID": "Id_001"
   },
   {
     "dataset_type": "nir",
@@ -34,6 +38,10 @@
     "spec_dims": null,
     "mean": null,
     "std": null,
+    "slope": 0.2,
+    "offset": 0.2,
+    "noise": 0.002,
+    "shift": 0.05,
     "LR": 0.0009,
     "WD": 0.0052,
     "PS": 48,
@@ -41,7 +49,7 @@
     "TL": 4,
     "HDS": 4,
     "MLP": 16,
-    "id": "Id_002"
+    "ID": "Id_002"
   },
   {
     "dataset_type": "nir",
@@ -56,6 +64,10 @@
     "spec_dims": null,
     "mean": null,
     "std": null,
+    "slope": 0.2,
+    "offset": 0.2,
+    "noise": 0.002,
+    "shift": 0.05,
     "LR": 0.0008,
     "WD": 0.005,
     "PS": 64,
@@ -63,7 +75,7 @@
     "TL": 6,
     "HDS": 6,
     "MLP": 24,
-    "id": "Id_003"
+    "ID": "Id_003"
   },
   {
     "dataset_type": "nir",
@@ -78,6 +90,10 @@
     "spec_dims": null,
     "mean": null,
     "std": null,
+    "slope": 0.2,
+    "offset": 0.2,
+    "noise": 0.002,
+    "shift": 0.05,
     "LR": 0.0004,
     "WD": 0.0038,
     "PS": 64,
@@ -85,7 +101,7 @@
     "TL": 6,
     "HDS": 6,
     "MLP": 24,
-    "id": "Id_004"
+    "ID": "Id_004"
   },
   {
     "dataset_type": "nir",
@@ -100,6 +116,10 @@
     "spec_dims": null,
     "mean": null,
     "std": null,
+    "slope": 0.2,
+    "offset": 0.2,
+    "noise": 0.002,
+    "shift": 0.05,
     "LR": 0.0007,
     "WD": 0.0048,
     "PS": 80,
@@ -107,7 +127,7 @@
     "TL": 8,
     "HDS": 8,
     "MLP": 24,
-    "id": "Id_005"
+    "ID": "Id_005"
   },
   {
     "dataset_type": "nir",
@@ -122,6 +142,10 @@
     "spec_dims": null,
     "mean": null,
     "std": null,
+    "slope": 0.2,
+    "offset": 0.2,
+    "noise": 0.002,
+    "shift": 0.05,
     "LR": 0.00035,
     "WD": 0.0035,
     "PS": 96,
@@ -129,7 +153,7 @@
     "TL": 10,
     "HDS": 10,
     "MLP": 32,
-    "id": "Id_006"
+    "ID": "Id_006"
   },
   {
     "dataset_type": "nir",
@@ -144,6 +168,10 @@
     "spec_dims": null,
     "mean": null,
     "std": null,
+    "slope": 0.2,
+    "offset": 0.2,
+    "noise": 0.002,
+    "shift": 0.05,
     "LR": 0.0006,
     "WD": 0.0045,
     "PS": 112,
@@ -151,7 +179,7 @@
     "TL": 12,
     "HDS": 12,
     "MLP": 36,
-    "id": "Id_007"
+    "ID": "Id_007"
   },
   {
     "dataset_type": "nir",
@@ -166,6 +194,10 @@
     "spec_dims": null,
     "mean": null,
     "std": null,
+    "slope": 0.2,
+    "offset": 0.2,
+    "noise": 0.002,
+    "shift": 0.05,
     "LR": 0.0005,
     "WD": 0.004,
     "PS": 128,
@@ -173,7 +205,7 @@
     "TL": 14,
     "HDS": 14,
     "MLP": 48,
-    "id": "Id_008"
+    "ID": "Id_008"
   },
   {
     "dataset_type": "nir",
@@ -188,6 +220,10 @@
     "spec_dims": null,
     "mean": null,
     "std": null,
+    "slope": 0.2,
+    "offset": 0.2,
+    "noise": 0.002,
+    "shift": 0.05,
     "LR": 0.0003,
     "WD": 0.003,
     "PS": 96,
@@ -195,7 +231,7 @@
     "TL": 10,
     "HDS": 10,
     "MLP": 40,
-    "id": "Id_009"
+    "ID": "Id_009"
   },
   {
     "dataset_type": "nir",
@@ -210,6 +246,10 @@
     "spec_dims": null,
     "mean": null,
     "std": null,
+    "slope": 0.2,
+    "offset": 0.2,
+    "noise": 0.002,
+    "shift": 0.05,
     "LR": 0.0002,
     "WD": 0.0025,
     "PS": 112,
@@ -217,6 +257,6 @@
     "TL": 12,
     "HDS": 12,
     "MLP": 48,
-    "id": "Id_010"
+    "ID": "Id_010"
   }
 ]

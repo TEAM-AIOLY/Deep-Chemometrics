@@ -12,7 +12,11 @@ base_params = {
     "seed": 42,
     "spec_dims": None,
     "mean": None,
-    "std": None
+    "std": None,
+    "slope": 0.2,
+    "offset": 0.2,
+    "noise": 0.002,
+    "shift": 0.05
 }
 
 # List of different possible y_labels
@@ -54,7 +58,7 @@ param_variations = [
 params_list = []
 for idx, params in enumerate(param_variations):
     # Add 'id' to each parameter set dynamically
-    params["id"] = f"Id_{idx+1:03d}"
+    params["ID"] = f"Id_{idx+1:03d}"
     
     # Update the base params with the new values
     param_dict = base_params.copy()
