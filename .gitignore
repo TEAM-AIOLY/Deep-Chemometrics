@@ -4,4 +4,4 @@ __pycache__/
 *$py.class
 *.csv
 *.pth
-aioly_env/
+deepchemo/
