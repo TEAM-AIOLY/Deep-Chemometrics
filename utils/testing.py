@@ -36,12 +36,16 @@ def ccc(y_true,y_pred):
     return(ccc)
 
 
-def test(model, model_path, test_loader,device = "cuda") :
+def test(model, model_path, test_loader,classification = True) :
     
     Y = []
     y_pred = []
     model.load_state_dict(torch.load(model_path))
-    
+    if torch.cuda.is_available():
+        device = torch.device("cuda")
+    else:
+        device = torch.device("cpu")
+
     model.to(device)
     with torch.no_grad():
         for inputs, targets in test_loader:
@@ -53,33 +57,45 @@ def test(model, model_path, test_loader,device = "cuda") :
 
     Y = np.array(Y)
     y_pred = np.array(y_pred)
-    for i in range(Y.shape[1]):
-        ccc_score = ccc(y_pred[:,i],Y[:,i])
-        r2_score_ = r2_score( Y[:,i],y_pred[:,i])
-        rmsep_score = RMSEP(y_pred[:,i], Y[:,i])
 
-        print(f"CCC: {ccc_score}, R2: {r2_score_}, RMSEP: {rmsep_score}")
+    if classification :
+        #affichage de la matrice de confusion
+        y_pred = torch.Tensor(y_pred)
+        y_pred = torch.softmax(y_pred, dim = 1)
+        from sklearn.metrics import classification_report, confusion_matrix
+        y_pred = np.argmax(y_pred, axis = 1)
+        Y = np.argmax(Y, axis = 1)
+        print(classification_report(Y, y_pred))
+        print(confusion_matrix(Y, y_pred))
 
+    else :
+        for i in range(Y.shape[1]):
+            ccc_score = ccc(y_pred[:,i],Y[:,i])
+            r2_score_ = r2_score( Y[:,i],y_pred[:,i])
+            rmsep_score = RMSEP(y_pred[:,i], Y[:,i])
 
-        plt.figure(figsize=(8,6))
-
-        # Scatter plot of X vs Y
-        plt.scatter(Y,y_pred,edgecolors='k',alpha=0.5)
-
-        # Plot of the 45 degree line
-        plt.plot([Y.min()-1,Y.max()+1],[Y.min()-1,Y.max()+1],'r')
-        # add text with cc_score and r2_score
-        plt.text(0.95, 0.05, f'CCC: {ccc_score:.2f}\nR²: {r2_score_:.2f}',
-             transform=plt.gca().transAxes, fontsize=12,
-             verticalalignment='bottom', horizontalalignment='right',
-             bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5'),
-             color='red', fontweight='bold', fontfamily='serif')
+            print(f"CCC: {ccc_score}, R2: {r2_score_}, RMSEP: {rmsep_score}")
 
 
-        plt.xticks(fontsize=16)
-        plt.yticks(fontsize=16)
-        plt.xlabel('Observed',fontsize=16)
-        plt.ylabel('Predicted',fontsize=16)
-        plt.title(f'Predicted vs Observed for y{i}',fontsize=16)
+            plt.figure(figsize=(8,6))
 
-        plt.show(block=False)
+            # Scatter plot of X vs Y
+            plt.scatter(Y,y_pred,edgecolors='k',alpha=0.5)
+
+            # Plot of the 45 degree line
+            plt.plot([Y.min()-1,Y.max()+1],[Y.min()-1,Y.max()+1],'r')
+            # add text with cc_score and r2_score
+            plt.text(0.95, 0.05, f'CCC: {ccc_score:.2f}\nR²: {r2_score_:.2f}',
+                 transform=plt.gca().transAxes, fontsize=12,
+                 verticalalignment='bottom', horizontalalignment='right',
+                 bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5'),
+                 color='red', fontweight='bold', fontfamily='serif')
+
+
+            plt.xticks(fontsize=16)
+            plt.yticks(fontsize=16)
+            plt.xlabel('Observed',fontsize=16)
+            plt.ylabel('Predicted',fontsize=16)
+            plt.title(f'Predicted vs Observed for y{i}',fontsize=16)
+
+            plt.show(block=False)
