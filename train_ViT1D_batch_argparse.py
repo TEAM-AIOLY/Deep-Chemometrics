@@ -49,7 +49,7 @@ if __name__ == "__main__":
     # params =params_dict[0]   
     
     for idx,params in enumerate(params_dict):    
-    
+        print(f"train with parameter set run_{params['ID']}")
         seed=42
         NUM_WORKERS =0
         
@@ -78,6 +78,7 @@ if __name__ == "__main__":
         cal_dataset, val_dataset = random_split(train_dataset, [cal_size, val_size], 
                                                 generator=torch.Generator().manual_seed(seed))
         
+       
         cal_dataset.dataset.preprocessing=augmentation
 
         # Create data loaders
@@ -145,9 +146,9 @@ if __name__ == "__main__":
             pdf_path =base_path+ f"/RMSE_{params['dataset_type']}.pdf"
             plt.savefig(pdf_path, format='pdf')
 
-            pickle_path = base_path + f"/RMSE_{params['dataset_type']}.pkl"
-            with open(pickle_path, 'wb') as f:
-                pickle.dump(fig, f)
+            # pickle_path = base_path + f"/RMSE_{params['dataset_type']}.pkl"
+            # with open(pickle_path, 'wb') as f:
+            #     pickle.dump(fig, f)
         
 
 
@@ -212,9 +213,9 @@ if __name__ == "__main__":
         pdf_path = base_path +f"/predicted_vs_observed_{params['dataset_type']}.pdf"
         plt.savefig(pdf_path, format='pdf')
 
-        pickle_path = base_path + f"/predicted_vs_observed_{params['dataset_type']}.pkl"
-        with open(pickle_path, 'wb') as f:
-            pickle.dump(fig, f)
+        # pickle_path = base_path + f"/predicted_vs_observed_{params['dataset_type']}.pkl"
+        # with open(pickle_path, 'wb') as f:
+        #     pickle.dump(fig, f)
         
 
         
@@ -236,14 +237,14 @@ if __name__ == "__main__":
         ax.set_title(f'Predicted vs Real Values for Oc (log x + 1)')
         
         
-        all_labels = ["oc_usda.c729_w.pct","na.ext_usda.a726_cmolc.kg","clay.tot_usda.a334_w.pct", "k.ext_usda.a725_cmolc.kg", "ph.h2o_usda.a268_index" ]  #
-        if len(params['y_labels'])==1:
-            target_index = all_labels.index(params['y_labels'][0])
-        else:
-            target_index=len(params['y_labels'])
+        # all_labels = ["oc_usda.c729_w.pct","na.ext_usda.a726_cmolc.kg","clay.tot_usda.a334_w.pct", "k.ext_usda.a725_cmolc.kg", "ph.h2o_usda.a268_index" ]  #
+        # if len(params['y_labels'])==1:
+        #     target_index = all_labels.index(params['y_labels'][0])
+        # else:
+        #     target_index=len(params['y_labels'])
         
         plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15),
-                    fancybox=True, shadow=True, ncol=5, fontsize=12,labelcolor =default_colors[target_index])
+                    fancybox=True, shadow=True, ncol=5, fontsize=12) #labelcolor =default_colors[target_index]
         plt.tight_layout()
         plt.grid()
         # fig.show()
@@ -252,7 +253,21 @@ if __name__ == "__main__":
         plt.savefig(hexbin_pdf_path, format='pdf')
 
         # Save the figure object using pickle
-        hexbin_pickle_path = base_path+ f"/fig_hexbin.pkl"
-        with open(hexbin_pickle_path, 'wb') as f:
-            pickle.dump(fig, f)    
+        # hexbin_pickle_path = base_path+ f"/fig_hexbin.pkl"
+        # with open(hexbin_pickle_path, 'wb') as f:
+        #     pickle.dump(fig, f)    
+            
+        del augmentation
+        del spectral_data
+        del train_dataset, test_dataset, cal_dataset, val_dataset
+        del cal_loader, val_loader, test_loader
+        del mean, std
+        del model, optimizer, criterion
+        del train_losses, val_losses, val_r2_scores, final_save_path
+
+        # Optional: Clear PyTorch cache
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+
+        print(f"Finished cleaning variables for run_{params['ID']}")
 
