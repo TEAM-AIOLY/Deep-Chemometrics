@@ -1,18 +1,5 @@
 
-#_______________ FOR WSL ONLY ON LOCAL ______________
-# ______________activate venv ! _____________________
-#/mnt/c/Users/fabdelghafo/im_regis/Scripts
-#dos2unix ./activate
-#source ./ activate
-#____________________________________________________
-
-
-VENV_PATH="/mnt/c/Users/fabdelghafo/im_regis/Scripts"
-dos2unix "$VENV_PATH/activate"
-source "$VENV_PATH/activate"
-which python3
-
-PYTHON_SCRIPT="./read_json_argparse_dict.py"
+PYTHON_SCRIPT="./train_ViT1D_batch_argparse.py"
 
 # Specify the path to your JSON configuration file
 CONFIG_FILE="./data/dataset/ossl/config/_ViT1D_(oc_us).json"
