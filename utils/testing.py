@@ -60,8 +60,10 @@ def test(model, model_path, test_loader,classification = True) :
 
     if classification :
         #affichage de la matrice de confusion
-        y_pred = torch.Tensor(y_pred)
-        y_pred = torch.softmax(y_pred, dim = 1)
+        #y_pred = torch.Tensor(y_pred)
+        #y_pred = y_pred.softmax(1)
+        y_pred = np.exp(y_pred) / np.sum(np.exp(y_pred), axis=1, keepdims=True)
+        print(y_pred.shape)
         from sklearn.metrics import classification_report, confusion_matrix
         y_pred = np.argmax(y_pred, axis = 1)
         Y = np.argmax(Y, axis = 1)
