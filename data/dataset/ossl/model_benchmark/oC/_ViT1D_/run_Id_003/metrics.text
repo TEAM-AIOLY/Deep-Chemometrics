@@ -1,0 +1,17 @@
+dataset_type: nir
+data_path: ./data/dataset/ossl/ossl_all_L1_v1.2.csv
+mean: tensor([0.0942, 0.0935, 0.0925,  ..., 0.3796, 0.3794, 0.3793])
+std: tensor([0.0431, 0.0424, 0.0416,  ..., 0.1066, 0.1066, 0.1065])
+y_labels: ['oc_usda.c729_w.pct']
+num_epochs: 500
+batch_size: 1024
+seed: 42
+LR: 0.0008
+WD: 0.005
+slope: 0.2
+offset: 0.2
+noise: 0.002
+shift: 0.05
+CCC: 0.9692649453806331
+r2: 0.938800023316202
+rmsep: 0.32996881590971366
