@@ -4,7 +4,7 @@ import json
 
 base_params = {
     "dataset_type": "nir",
-    "data_path": "./data/dataset/ossl/ossl_all_L1_v1.2.csv",  
+    "data_path": "./data/dataset/Mango/mango_dm_full_outlier_removed2.mat",  
     "y_labels": [],
     "batch_size": 1024,
     "num_epochs": 500,
@@ -33,10 +33,15 @@ y_labels =y_labels_options[0]
 base_params["y_labels"] = y_labels
 y_labels_short_str = y_labels[0][:5]
 
+y_lab = 'mango_dm'
+
 param_file = os.path.join(
     os.path.dirname(base_params['data_path']),'config',
-    f"{base_params['model_name']}({y_labels_short_str}).json"
+    f"{base_params['model_name']}({y_lab}).json"
 ).replace("\\", "/")
+
+os.makedirs(os.path.dirname(param_file), exist_ok=True)
+    
 
 
 
