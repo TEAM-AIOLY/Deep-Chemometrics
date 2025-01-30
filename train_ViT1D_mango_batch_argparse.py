@@ -118,7 +118,7 @@ if __name__ == "__main__":
         
         
         train_losses, val_losses,val_r2_scores,final_save_path = train(model, optimizer, criterion, cal_loader, val_loader, 
-                                        num_epochs=params['num_epochs'], plot_fig=False,save_path=base_path)
+                                        num_epochs=params['num_epochs'],save_path=base_path)
 
         tl = torch.stack(train_losses).numpy()
         vl = torch.stack(val_losses).numpy()
