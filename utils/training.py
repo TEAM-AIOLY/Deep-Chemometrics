@@ -3,27 +3,36 @@ import torcheval.metrics
 import numpy as np
 import os
 import matplotlib.pyplot as plt
+import pytorch_warmup as warmup
+import datetime
             
-            
-            
+                     
 ###############################################################################
-def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, save_path=None,classification = False, epoch_save_step =250):
+def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, save_path=None,classification = False, epoch_save_step =250,doWarmup = False):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.to(device)
     
+
+    if doWarmup:
+        num_steps = len(train_loader) * num_epochs
+        lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_steps)
+        warmup_scheduler = warmup.UntunedLinearWarmup(optimizer)
+
     
     train_losses = []
     val_losses = []
     val_r2_scores = []
     val_f1_scores = []
     
-    if classification:
-         min_val_loss = np.inf
-    else:
-        min_val_loss = np.inf
-        
-    best_model_state = None  
-    best_epoch = -1  
+    metric = 0.0
+    best_metric = -1.0
+    
+    if save_path:
+        with open(save_path + "_telemetry.txt", "a") as myfile:
+            dt = datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")
+            myfile.write("\n\n--------------------------------------------------------------\nTraining "
+                            + dt
+                            + "\n--------------------------------------------------------------\n")
 
     for epoch in range(num_epochs):
         model.train()
@@ -31,6 +40,7 @@ def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, sav
             running_loss = torch.zeros(1, device=device)
         else :
              running_loss = torch.zeros(model.out_dims, device=device)
+             
         for inputs, targets in train_loader:
             
             inputs = inputs.to(device,non_blocking=True).float()
@@ -41,6 +51,10 @@ def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, sav
             torch.mean(loss).backward()  # Backward pass
             optimizer.step()  # Update weights
             
+            if doWarmup:
+                with warmup_scheduler.dampening():
+                        lr_scheduler.step()
+        
             running_loss += loss.mean(dim=0) * inputs.size(0)
             
         epoch_loss = running_loss / len(train_loader.dataset)
@@ -52,6 +66,7 @@ def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, sav
             val_loss = torch.zeros(1, device=device)
         else:
             val_loss = torch.zeros(model.out_dims, device=device)
+            
         out = []
         tar = []
         with torch.no_grad():
@@ -77,18 +92,23 @@ def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, sav
         f1_scores = []
         
         if not classification:
+
             R2 = [torcheval.metrics.R2Score() for _ in range(model.out_dims)]
             for i in range(model.out_dims):
-                R2[i].update(all_targets[:, i],all_outputs[:, i])
+                R2[i].update(all_targets[:, i], all_outputs[:, i])
                 r2_score = R2[i].compute().item()
                 r2_scores.append(r2_score)
-            
+
             val_r2_scores.append(r2_scores)
+            metric = r2_scores
         else :
+
             F1 = torcheval.metrics.MulticlassF1Score()
             F1.update(torch.argmax(all_targets,dim=1), torch.argmax(all_outputs,dim=1))
             f1_scores = F1.compute()
             val_f1_scores.append(f1_scores)
+            metric = f1_scores
+
 
 
         
@@ -99,39 +119,33 @@ def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, sav
         if classification :
             print(
                 f'Epoch {epoch + 1}/{num_epochs} | Train Losses: {train_loss_str} | Validation Losses: {val_loss_str}| F1 Score: {f1_scores}')
+            with open(save_path + "_telemetry.txt", "a") as myfile:
+                    myfile.write(f'Epoch {epoch + 1}/{num_epochs} | Train Losses: {train_loss_str} | Validation Losses: {val_loss_str} | F1 Score: {f1_scores}\n')
         else :
             print(f'Epoch {epoch+1}/{num_epochs} | Train Losses: {train_loss_str} | Validation Losses: {val_loss_str} | R2 Scores: {r2_score_str}')
-
+            with open(save_path + "_telemetry.txt", "a") as myfile:
+                    myfile.write(f'Epoch {epoch + 1}/{num_epochs} | Train Losses: {train_loss_str} | Validation Losses: {val_loss_str} | R2 Score: {r2_score_str}\n')
         
-        if save_path:
-            if classification:
-                current_metric = val_loss.mean()  # Lower is better
-                if current_metric < min_val_loss and (epoch + 1) > num_epochs * 0.1:
-                    min_val_loss = current_metric
-                    best_model_state = model.state_dict().copy()  # Store best model state
-                    best_epoch = epoch
-            else:
-                current_metric = val_loss.mean()
-                if current_metric  < min_val_loss and (epoch + 1) > num_epochs * 0.1:
-                    min_val_loss = current_metric  
-                    best_model_state = model.state_dict().copy()
-                    best_epoch = epoch
-
-            # Save checkpoint every 100 epochs
-            if (epoch + 1) % epoch_save_step == 0:
-                checkpoint_path = os.path.join(save_path, f"checkpoint_epoch{epoch + 1}.pth")
+        if save_path and (epoch + 1) % epoch_save_step == 0:
+                checkpoint_path = os.path.join(save_path, f"_epoch{epoch + 1}.pth")
                 torch.save(model.state_dict(), checkpoint_path)
-                print(f"💾 Checkpoint saved at epoch {epoch + 1} to {checkpoint_path}")
+                print(f'Model saved at epoch {epoch + 1} to {checkpoint_path}')
+                
+                
+        if  save_path and metric > best_metric:
+            best_save_path = os.path.join(save_path, f'_best.pth')
+            best_metric = metric
+            torch.save(model.state_dict(), best_save_path)        
             
-    if save_path and best_model_state is not None:
-        best_model_path = os.path.join(save_path, f"best_model_{best_epoch+1}.pth")
-        torch.save(best_model_state, best_model_path)
-        print(f"✅ Best model saved from epoch {best_epoch + 1} to {best_model_path}")
-
+    if save_path:
+        final_save_path = save_path + f'_epoch_{num_epochs}_final.pth'
+        torch.save(model.state_dict(), final_save_path)
+        print(f"Final model saved at {final_save_path}") 
+     
 
 
     if save_path:
-        return train_losses, val_losses, val_r2_scores , best_model_state
+        return train_losses, val_losses, val_r2_scores , final_save_path
     else :
         return train_losses, val_losses, val_r2_scores
 ###############################################################################

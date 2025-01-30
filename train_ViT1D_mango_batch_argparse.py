@@ -158,9 +158,7 @@ if __name__ == "__main__":
         CCC =ccc(y_pred,Y)
         r2=r2_score(y_pred, Y)
         rmsep=RMSEP(y_pred, Y)
-            
-
-                
+                  
         metrics_dict = {
         'dataset_type': params['dataset_type'],
         'data_path': params['data_path'], 
@@ -236,7 +234,6 @@ if __name__ == "__main__":
         ax.set_xlabel('Real Values')
         ax.set_ylabel('Predicted Values')
         ax.set_title(f'Predicted vs Real Values for dry matter')
-        
         
             
         plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15),
