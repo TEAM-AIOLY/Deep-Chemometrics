@@ -117,9 +117,10 @@ if __name__ == "__main__":
         print(base_path)
         
         
-        train_losses, val_losses,val_r2_scores,final_save_path = train(model, optimizer, criterion, cal_loader, val_loader, 
+        train_losses, val_losses,val_r2_scores,best_model_path = train(model, optimizer, criterion, cal_loader, val_loader, 
                                         num_epochs=params['num_epochs'],save_path=base_path)
 
+        print(best_model_path)
         tl = torch.stack(train_losses).numpy()
         vl = torch.stack(val_losses).numpy()
         r2= np.array(val_r2_scores)
@@ -152,40 +153,40 @@ if __name__ == "__main__":
         
 
 
-            y_pred,Y=test(model,final_save_path,val_loader)
-            
-            CCC =ccc(y_pred,Y)
-            r2=r2_score(y_pred, Y)
-            rmsep=RMSEP(y_pred, Y)
-            
-
-                    
-            metrics_dict = {
-            'dataset_type': params['dataset_type'],
-            'data_path': params['data_path'], 
-            'mean': params['mean'],
-            'std': params['std'],
-            'y_labels': params['y_labels'],
-            'num_epochs': params['num_epochs'],
-            "batch_size": params['batch_size'],
-            "seed": params['seed'] ,
-            "LR": params['LR'] ,
-            "WD": params['WD'] ,
-            "slope":params['slope'],
-            "offset":params['offset'],
-            "noise": params['noise'],
-            "shift":params['shift'],
-            "CCC": CCC,
-            "r2": r2,
-            "rmsep":rmsep
-            }
-            
-                
-            with open((base_path+'/metrics.text'), 'w') as f:
-                for key, value in metrics_dict.items():
-                    f.write(f"{key}: {value}\n")
-
+        y_pred,Y=test(model,best_model_path,val_loader)
         
+        CCC =ccc(y_pred,Y)
+        r2=r2_score(y_pred, Y)
+        rmsep=RMSEP(y_pred, Y)
+            
+
+                
+        metrics_dict = {
+        'dataset_type': params['dataset_type'],
+        'data_path': params['data_path'], 
+        'mean': params['mean'],
+        'std': params['std'],
+        'y_labels': params['y_labels'],
+        'num_epochs': params['num_epochs'],
+        "batch_size": params['batch_size'],
+        "seed": params['seed'] ,
+        "LR": params['LR'] ,
+        "WD": params['WD'] ,
+        "slope":params['slope'],
+        "offset":params['offset'],
+        "noise": params['noise'],
+        "shift":params['shift'],
+        "CCC": CCC,
+        "r2": r2,
+        "rmsep":rmsep
+        }
+        
+            
+        with open((base_path+'/metrics.text'), 'w') as f:
+            for key, value in metrics_dict.items():
+                f.write(f"{key}: {value}\n")
+
+    
         print("CCC: %5.5f, R2: %5.5f, RMSEP: %5.5f"%(CCC, r2, rmsep))
 
         fig, ax = plt.subplots()
@@ -265,7 +266,7 @@ if __name__ == "__main__":
         del cal_loader, val_loader, test_loader
         del mean, std
         del model, optimizer, criterion
-        del train_losses, val_losses, val_r2_scores, final_save_path
+        del train_losses, val_losses, val_r2_scores, best_model_path
 
         # Optional: Clear PyTorch cache
         if torch.cuda.is_available():
