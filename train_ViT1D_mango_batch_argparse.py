@@ -205,7 +205,7 @@ if __name__ == "__main__":
         
         ax.set_xlabel('Real Values')
         ax.set_ylabel('Predicted Values')
-        ax.set_title(f'Predicted vs Real Values for dry matter (log x + 1)')
+        ax.set_title(f'Predicted vs Real Values for dry matter')
         
         plt.tight_layout()
         plt.grid()
@@ -235,7 +235,7 @@ if __name__ == "__main__":
         
         ax.set_xlabel('Real Values')
         ax.set_ylabel('Predicted Values')
-        ax.set_title(f'Predicted vs Real Values for dry matter (log x + 1)')
+        ax.set_title(f'Predicted vs Real Values for dry matter')
         
         
             
