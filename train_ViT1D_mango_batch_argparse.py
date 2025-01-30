@@ -101,6 +101,7 @@ if __name__ == "__main__":
         test_loader = data_utils.DataLoader(test_dt, batch_size=1024, shuffle=True)
         
         spec_dims = x_cal.shape[1]
+        params['spec_dims']=spec_dims
         
         model=ViT_1D(mean = params['mean'], std = params['std'], seq_len = params['spec_dims'], patch_size = params['PS'], 
                     dim_embed = params['DE'], trans_layers = params['TL'], heads = params['HDS'], mlp_dim = params['MLP'], out_dims = len(params['y_labels']) )
