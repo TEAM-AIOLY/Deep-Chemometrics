@@ -7,7 +7,7 @@ base_params = {
     "data_path": "./data/dataset/Mango/mango_dm_full_outlier_removed2.mat",  
     "y_labels": [],
     "batch_size": 1024,
-    "num_epochs": 500,
+    "num_epochs": 1000,
     "model_name": "_ViT1D_Mango",
     "seed": 42,
     "spec_dims": None,
