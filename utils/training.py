@@ -3,48 +3,11 @@ import torcheval.metrics
 import numpy as np
 import os
 import matplotlib.pyplot as plt
-
-class EarlyStopping:
-    def __init__(self, patience=10, delta_factor=0.00025, save_path=None):
-        self.patience = patience
-        self.counter = 0
-        self.early_stop = False
-        self.last_loss = np.Inf
-        
-        self.delta_factor = delta_factor
-        
-        if save_path is None:
-            rel_dir = os.path.dirname(os.path.abspath(__file__))
-            self.save_path = os.path.join(rel_dir, 'best_model.pth')
-        else:
-            self.save_path=save_path
-        os.makedirs(os.path.dirname(save_path), exist_ok=True)
-
-    def __call__(self, val_loss, model, epoch):
-        # Compute the adaptive delta
-        delta = self.delta_factor * self.last_loss if self.last_loss < np.Inf else 0
-        if val_loss < self.last_loss - delta:
-            self.counter = 0        
-        else:
-            self.counter += 1
-            if self.counter >= self.patience:
-                self.early_stop = True
-                self.save_checkpoint(val_loss, model, epoch)
-        
-        self.last_loss=val_loss
-      
-
-    def save_checkpoint(self, val_loss, model, epoch):
-
-        checkpoint_path = f'{self.save_path}_best_epoch_{epoch}.pth'
-        os.makedirs(os.path.dirname(checkpoint_path), exist_ok=True)
-        torch.save(model.state_dict(), checkpoint_path)
-        self.val_loss_min = val_loss
             
             
             
 ###############################################################################
-def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, save_path=None,classification = False, plot_fig=False):
+def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, save_path=None,classification = False, epoch_save_step =100):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.to(device)
     
@@ -54,10 +17,13 @@ def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, sav
     val_r2_scores = []
     val_f1_scores = []
     
-    if classification :
-        min_val_loss = np.inf
-    else :
-        min_val_loss = [0]
+    if classification:
+         min_val_loss = np.inf
+    else:
+        min_val_loss = -np.inf
+        
+    best_model_state = None  
+    best_epoch = -1  
 
     for epoch in range(num_epochs):
         model.train()
@@ -136,74 +102,35 @@ def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, sav
             print(f'Epoch {epoch+1}/{num_epochs} | Train Losses: {train_loss_str} | Validation Losses: {val_loss_str} | R2 Scores: {r2_score_str}')
 
         
-          # save best model via validation loss and 10% of total epochs , and save path with best name
-        #update the min_val_loss
         if save_path:
             if classification:
-                if val_loss.mean() < min_val_loss and (epoch + 1) > num_epochs*0.1 :
-                    min_val_loss = val_loss.mean()
-                    final_save_path = save_path + f'_final.pth'
-                    torch.save(model.state_dict(), final_save_path)
-                    print(f'Model saved at epoch {epoch + 1} to {final_save_path}')
-            else :
-                val = np.array(r2_scores)
-                if (val.mean() > min_val_loss) and (val.mean() < 1.5) and (epoch + 1) > num_epochs*0.1  :
-                    min_val_loss = val.mean()
-                    final_save_path = save_path + f"/best_model_epoch{epoch}_.pth"
-                    torch.save(model.state_dict(), final_save_path)
-                    print(f'Model saved at epoch {epoch + 1} to {final_save_path}')
+                current_metric = val_loss.mean().item()  # Lower is better
+                if current_metric < min_val_loss and (epoch + 1) > num_epochs * 0.1:
+                    min_val_loss = current_metric
+                    best_model_state = model.state_dict().copy()  # Store best model state
+                    best_epoch = epoch
+            else:
+                current_metric = np.mean(r2_scores)  # Higher is better
+                if current_metric > min_val_loss:
+                    min_val_loss = current_metric
+                    best_model_state = model.state_dict().copy()
+                    best_epoch = epoch
+
+            # Save checkpoint every 100 epochs
+            if (epoch + 1) % epoch_save_step == 0:
+                checkpoint_path = os.path.join(save_path, f"checkpoint_epoch{epoch + 1}.pth")
+                torch.save(model.state_dict(), checkpoint_path)
+                print(f"💾 Checkpoint saved at epoch {epoch + 1} to {checkpoint_path}")
+
+    if save_path and best_model_state is not None:
+        best_model_path = os.path.join(save_path, "best_model.pth")
+        torch.save(best_model_state, best_model_path)
+        print(f"✅ Best model saved from epoch {best_epoch + 1} to {best_model_path}")
 
 
-    train_losses_np = [loss.numpy() for loss in train_losses]
-    val_losses_np = [loss.numpy() for loss in val_losses]
-      
-
-    if plot_fig==True:
-        # Create figure and axes
-        fig, ax1 = plt.subplots(figsize=(12, 6))
-        
-        # Plotting Training and Validation Losses
-        ax1.set_xlabel('Epoch')
-        ax1.set_ylabel('Loss', color='tab:blue')
-        ax1.plot(train_losses_np, label='Training Loss', color='tab:blue')
-        ax1.plot(val_losses_np, label='Validation Loss', color='tab:orange')
-        ax1.tick_params(axis='y', labelcolor='tab:blue')
-        ax1.legend(loc='upper left')
-
-        # Create another y-axis for R2 Scores
-        if not classification:
-            ax2 = ax1.twinx()
-            ax2.set_ylabel('R2 Score', color='tab:green')
-
-            # Assuming val_r2_scores is a list of lists (one list per epoch)
-            for i in range(len(val_r2_scores[0])):  # Loop over each target dimension
-                r2_scores = [scores[i] for scores in val_r2_scores]
-                ax2.plot(r2_scores, label=f'R2 Score y{i}', linestyle='--')
-
-            ax2.tick_params(axis='y', labelcolor='tab:green')
-            ax2.legend(loc='upper right')
-
-        else :
-            ax2 = ax1.twinx()
-            ax2.set_ylabel('F1 Score', color='tab:green')
-
-            # Assuming val_r2_scores is a list of lists (one list per epoch)
-
-
-            ax2.plot(val_f1_scores, label=f'f1 Score ', linestyle='--')
-
-            ax2.tick_params(axis='y', labelcolor='tab:green')
-            ax2.legend(loc='upper right')
-
-        # Set title and layout
-        plt.title('Training and Validation Metrics per Epoch')
-        fig.tight_layout()  # To prevent overlapping
-
-        # Show the plot
-        # plt.close()
 
     if save_path:
-        return train_losses, val_losses, val_r2_scores , final_save_path
+        return train_losses, val_losses, val_r2_scores , best_model_state
     else :
         return train_losses, val_losses, val_r2_scores
 ###############################################################################
