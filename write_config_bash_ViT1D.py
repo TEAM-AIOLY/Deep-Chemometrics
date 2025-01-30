@@ -8,7 +8,7 @@ base_params = {
     "y_labels": [],
     "batch_size": 1024,
     "num_epochs": 500,
-    "model_name": "_ViT1D_",
+    "model_name": "_ViT1D_Mango",
     "seed": 42,
     "spec_dims": None,
     "mean": None,
@@ -28,12 +28,13 @@ y_labels_options = [
     ["ph.h2o_usda.a268_index"],
 ]
 
-params_list = []
-y_labels =y_labels_options[0]
-base_params["y_labels"] = y_labels
-y_labels_short_str = y_labels[0][:5]
+# params_list = []
+# y_labels =y_labels_options[0]
+# base_params["y_labels"] = y_labels
+# y_labels_short_str = y_labels[0][:5]
 
 y_lab = 'mango_dm'
+y_labels =y_lab
 
 param_file = os.path.join(
     os.path.dirname(base_params['data_path']),'config',
