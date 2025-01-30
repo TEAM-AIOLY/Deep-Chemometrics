@@ -20,7 +20,7 @@ def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, sav
     if classification:
          min_val_loss = np.inf
     else:
-        min_val_loss = -np.inf
+        min_val_loss = np.inf
         
     best_model_state = None  
     best_epoch = -1  
