@@ -15,7 +15,7 @@ def test(model, model_path, test_loader) :
     Y = torch.tensor([]).cpu() 
     y_pred = torch.tensor([]).cpu()  
     
-    model.load_state_dict(torch.load(model_path))
+    model.load_state_dict(torch.load(model_path,weights_only=True))
     
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.to(device)

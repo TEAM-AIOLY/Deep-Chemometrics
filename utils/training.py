@@ -111,9 +111,9 @@ def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, sav
                     best_model_state = model.state_dict().copy()  # Store best model state
                     best_epoch = epoch
             else:
-                current_metric = np.array(r2_scores)
-                if current_metric < min_val_loss and (epoch + 1) > num_epochs * 0.1:
-                    min_val_loss = current_metric
+                current_metric = val_loss.mean()
+                if current_metric  < min_val_loss and (epoch + 1) > num_epochs * 0.1:
+                    min_val_loss = current_metric  
                     best_model_state = model.state_dict().copy()
                     best_epoch = epoch
 
@@ -122,7 +122,7 @@ def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, sav
                 checkpoint_path = os.path.join(save_path, f"checkpoint_epoch{epoch + 1}.pth")
                 torch.save(model.state_dict(), checkpoint_path)
                 print(f"💾 Checkpoint saved at epoch {epoch + 1} to {checkpoint_path}")
-
+            
     if save_path and best_model_state is not None:
         best_model_path = os.path.join(save_path, f"best_model_{best_epoch+1}.pth")
         torch.save(best_model_state, best_model_path)
