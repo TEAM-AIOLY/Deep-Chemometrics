@@ -85,6 +85,9 @@ if __name__ == "__main__":
         
         mean = np.mean(x_cal, axis=0)
         std = np.std(x_cal, axis=0)
+        
+        mean = torch.tensor(mean)
+        std = torch.tensor(std)
 
         params['mean'] = mean
         params['std'] = std
