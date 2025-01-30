@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
             
             
 ###############################################################################
-def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, save_path=None,classification = False, epoch_save_step =100):
+def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, save_path=None,classification = False, epoch_save_step =250):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.to(device)
     
@@ -20,7 +20,7 @@ def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, sav
     if classification:
          min_val_loss = np.inf
     else:
-        min_val_loss = np.inf
+        min_val_loss = -np.inf
         
     best_model_state = None  
     best_epoch = -1  
@@ -111,7 +111,7 @@ def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, sav
                     best_model_state = model.state_dict().copy()  # Store best model state
                     best_epoch = epoch
             else:
-                current_metric = val_loss.mean()  
+                current_metric = np.array(r2_scores)
                 if current_metric < min_val_loss and (epoch + 1) > num_epochs * 0.1:
                     min_val_loss = current_metric
                     best_model_state = model.state_dict().copy()
