@@ -238,8 +238,9 @@ slope: 0.1
 offset: 0.1
 noise: 0.0005
 shift: 0.1
-CCC: 3.8469173887278885e-05
-r2: -48494444.0
-rmsep: 5.26887845993042
+CCC: -1.8953647668240592e-05
+r2: -70270120.0
+rmsep: 7.792909145355225
 N parameters: 232413
 model_name: _ViT1D_Mango
+best epoch: 3

@@ -114,7 +114,7 @@ if __name__ == "__main__":
         
             
         
-        train_losses, val_losses,val_r2_scores,final_save_path = train(model, optimizer, criterion, cal_loader, val_loader, 
+        train_losses, val_losses,val_r2_scores,final_save_path,best_epoch = train(model, optimizer, criterion, cal_loader, val_loader, 
                                         num_epochs=params['num_epochs'], plot_fig=False,save_path=base_path)
 
         tl = torch.stack(train_losses).numpy()
@@ -174,9 +174,12 @@ if __name__ == "__main__":
             "shift":params['shift'],
             "CCC": CCC,
             "r2": r2,
-            "rmsep":rmsep
-            }
+            "rmsep":rmsep,
+            "N parameters" : sum(p.numel() for p in model.parameters()),
+            "model_name": params["model_name"],
+            "best epoch": best_epoch
             
+            }
                 
             with open((base_path+'/metrics.text'), 'w') as f:
                 for key, value in metrics_dict.items():

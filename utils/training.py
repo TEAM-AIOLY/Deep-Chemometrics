@@ -96,9 +96,9 @@ def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, sav
         
         train_loss_str = ', '.join([f'y {i}: {loss:.4f}' for i, loss in enumerate(epoch_loss)])
         val_loss_str = ', '.join([f'y {i}: {loss:.4f}' for i, loss in enumerate(val_loss)])
-        metric_str = ', '.join([f'y {i}: {score:.4f}' for i, score in enumerate(metrics)]) if not classification else f'F1 Score: {metrics:.4f}'
+        metric_str = ', '.join([f'R2 {i}: {score:.4f}' for i, score in enumerate(metrics)]) if not classification else f'F1 Score: {metrics:.4f}'
         
-        msg = f'Epoch {epoch + 1}/{num_epochs} | Train Losses: {train_loss_str} | Validation Losses: {val_loss_str} | Metrics: {metric_str}\n'
+        msg = f'Epoch {epoch + 1}/{num_epochs} | Train Losses: {train_loss_str} | Validation Losses: {val_loss_str} | {metric_str}\n'
         print(msg)
         with open(save_path + "_telemetry.txt", "a") as myfile:
             myfile.write(msg)
