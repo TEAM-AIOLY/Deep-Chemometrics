@@ -22,6 +22,7 @@ def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, sav
     val_metrics = []
     
     best_val_metric = np.inf if classification else -np.inf
+    best_epoch=-1
     
     if save_path:
         with open(save_path + "_telemetry.txt", "a") as myfile:
@@ -97,7 +98,7 @@ def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, sav
         val_loss_str = ', '.join([f'y {i}: {loss:.4f}' for i, loss in enumerate(val_loss)])
         metric_str = ', '.join([f'y {i}: {score:.4f}' for i, score in enumerate(metrics)]) if not classification else f'F1 Score: {metrics:.4f}'
         
-        msg = f'Epoch {epoch + 1}/{num_epochs} | Train Losses: {train_loss_str} | Validation Losses: {val_loss_str} | Metrics: {metric_str}'
+        msg = f'Epoch {epoch + 1}/{num_epochs} | Train Losses: {train_loss_str} | Validation Losses: {val_loss_str} | Metrics: {metric_str}\n'
         print(msg)
         with open(save_path + "_telemetry.txt", "a") as myfile:
             myfile.write(msg)
@@ -114,13 +115,14 @@ def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, sav
         if save_path and ((classification and current_val_metric < best_val_metric) or (not classification and current_val_metric > best_val_metric)):
             best_val_metric = current_val_metric
             torch.save(model.state_dict(), best_model_path)
+            best_epoch = epoch + 1
             print(f'Model saved at epoch {epoch + 1} to {best_model_path}')
 
      
 
 
     if save_path:
-        return train_losses, val_losses, val_metrics , best_model_path
+        return train_losses, val_losses, val_metrics , best_model_path,best_epoch
     else :
         return train_losses, val_losses, val_metrics
 ###############################################################################

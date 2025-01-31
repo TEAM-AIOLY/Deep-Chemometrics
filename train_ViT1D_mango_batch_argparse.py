@@ -118,7 +118,7 @@ if __name__ == "__main__":
         print(base_path)
         
         
-        train_losses, val_losses,val_r2_scores,best_model_path = train(model, optimizer, criterion, cal_loader, val_loader, 
+        train_losses, val_losses,val_r2_scores,best_model_path,best_epoch = train(model, optimizer, criterion, cal_loader, val_loader, 
                                         num_epochs=params['num_epochs'],save_path=base_path)
 
         print(best_model_path)
@@ -179,7 +179,9 @@ if __name__ == "__main__":
         "r2": r2,
         "rmsep":rmsep,
         "N parameters" : sum(p.numel() for p in model.parameters()),
-        "model_name": params["model_name"]
+        "model_name": params["model_name"],
+        "best epoch": best_epoch
+        
         }
         
             

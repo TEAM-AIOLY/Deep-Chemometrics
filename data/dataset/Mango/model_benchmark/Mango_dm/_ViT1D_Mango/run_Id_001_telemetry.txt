@@ -4,3 +4,9 @@
 Training 05:23PM on January 30, 2025
 --------------------------------------------------------------
 Epoch 1/10 | Train Losses: y 0: 251.4979 | Validation Losses: y 0: 217.2666 | R2 Score: y 0: -163006.4844
+
+
+--------------------------------------------------------------
+Training 10:00AM on January 31, 2025
+--------------------------------------------------------------
+Epoch 1/10 | Train Losses: y 0: 206.9736 | Validation Losses: y 0: 177.4776 | Metrics: y 0: -180192336.0000Epoch 2/10 | Train Losses: y 0: 157.1248 | Validation Losses: y 0: 134.5328 | Metrics: y 0: -68295304.0000Epoch 3/10 | Train Losses: y 0: 112.9080 | Validation Losses: y 0: 88.9367 | Metrics: y 0: 22574256.0000Epoch 4/10 | Train Losses: y 0: 69.1149 | Validation Losses: y 0: 47.8534 | Metrics: y 0: 3036586.5000Epoch 5/10 | Train Losses: y 0: 33.2352 | Validation Losses: y 0: 19.1772 | Metrics: y 0: -infEpoch 6/10 | Train Losses: y 0: 12.1343 | Validation Losses: y 0: 6.8954 | Metrics: y 0: -437552.4375Epoch 7/10 | Train Losses: y 0: 5.9495 | Validation Losses: y 0: 5.9753 | Metrics: y 0: -189582.9844Epoch 8/10 | Train Losses: y 0: 6.5759 | Validation Losses: y 0: 6.6900 | Metrics: y 0: -infEpoch 9/10 | Train Losses: y 0: 6.6580 | Validation Losses: y 0: 6.0444 | Metrics: y 0: -191776.0156Epoch 10/10 | Train Losses: y 0: 5.8899 | Validation Losses: y 0: 5.6580 | Metrics: y 0: 359036.3125
