@@ -49,15 +49,6 @@ if __name__ == "__main__":
           
     for idx,params in enumerate(params_dict):    
         print(f"train with parameter set run_{params['ID']}")
-        seed=42
-        NUM_WORKERS =0
-        
-        torch.manual_seed(seed)
-        if torch.cuda.is_available():
-            torch.cuda.manual_seed(seed)
-            torch.cuda.manual_seed_all(seed)
-            torch.backends.cudnn.deterministic = True
-            torch.backends.cudnn.benchmark = False
             
         augmentation = data_augmentation(slope=params['slope'], offset=params['offset'], noise=params['noise'], shift=params['shift'])
         print(f"data path = {params['data_path']}")

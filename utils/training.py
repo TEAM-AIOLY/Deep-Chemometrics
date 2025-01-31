@@ -112,13 +112,14 @@ def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, sav
                 
         # Save the best model based on validation metric
         current_val_metric = np.mean(metrics) if not classification else val_loss.mean()
-        if save_path and ((classification and current_val_metric < best_val_metric) or (not classification and current_val_metric > best_val_metric)):
+        if save_path and ((classification and current_val_metric < best_val_metric) or (not classification and current_val_metric > best_val_metric and current_val_metric < 1.1 )):
             best_val_metric = current_val_metric
             torch.save(model.state_dict(), best_model_path)
             best_epoch = epoch + 1
             print(f'Model saved at epoch {epoch + 1} to {best_model_path}')
 
-     
+        with open(save_path + "_telemetry.txt", "a") as myfile:
+             myfile.write(f'best epoch: {epoch + 1} for R² = {best_val_metric}')
 
 
     if save_path:

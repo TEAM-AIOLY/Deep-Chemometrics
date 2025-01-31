@@ -16,14 +16,37 @@ from utils.training import train
 from utils.testing import test
 
 
-
-
-
+            
+            
 data_path= "./data/dataset/Mango/mango_dm_full_outlier_removed2.mat",  
-y_labels=['dm_mango']
-
 data = sp.io.loadmat(data_path)
 print(data.keys())
+
+base_params = {
+    "dataset_type": "VisNIR",
+    "data_path": data_path,  
+    "y_labels": ['dm_mango'],
+    "batch_size": 1024,
+    "num_epochs": 2000,
+    "model_name": "_ViT1D_Mango",
+    "seed": 42,
+    "spec_dims": None,
+    "mean": None,
+    "std": None,
+    
+    "slope": 0.1,
+    "offset": 0.1,
+    "noise": 0.0005,
+    "shift": 0.1,
+    
+     "LR": 0.01, "WD": 0.0015, "PS": 10, "DE": 64, "TL": 8, "HDS": 8, "MLP": 64
+}
+
+model = ViT_1D(mean = mean,std = std, seq_len = spec_dims, patch_size = 10, dim_embed = 64, trans_layers = 8, heads = 8, mlp_dim = 64, out_dims =1, dropout=0.5) 
+optimizer = optim.Adam(model.parameters(), lr=LR, weight_decay=0.003/2)
+
+
+
 
 Ycal = data["DM_cal"]
 Ytest = data["DM_test"]
@@ -50,3 +73,31 @@ print('Calibration set dims X Y = {}\t{}'.format(x_cal.shape, y_cal.shape))
 print('val set dims X Y = {}\t{}'.format(x_val.shape, y_val.shape))
 print('Test set dims X Y = {}\t{}'.format(Xtest.shape, Ytest.shape))
 print('wavelengths number = {}'.format(np.shape(x_scale)))
+
+
+mean = np.mean(x_cal, axis=0)
+std = np.std(x_cal, axis=0)
+
+mean = torch.tensor(mean)
+std = torch.tensor(std)
+
+
+cal = MangoDataset(x_cal,y_cal, transform=data_augmentation(slope=params['slope'], offset=params['offset'], noise=params['noise'], shift=params['shift']))
+cal_loader = data_utils.DataLoader(cal, batch_size=1024, shuffle=True)
+
+
+val = data_utils.TensorDataset(torch.Tensor(x_val), torch.Tensor(y_val))
+val_loader = data_utils.DataLoader(val, batch_size=1024, shuffle=True)
+
+test_dt = data_utils.TensorDataset(torch.Tensor(Xtest), torch.Tensor(Ytest))
+test_loader = data_utils.DataLoader(test_dt, batch_size=1024, shuffle=True)
+
+spec_dims = x_cal.shape[1]
+params['spec_dims']=spec_dims
+
+model=ViT_1D(mean = params['mean'], std = params['std'], seq_len = params['spec_dims'], patch_size = params['PS'], 
+            dim_embed = params['DE'], trans_layers = params['TL'], heads = params['HDS'], mlp_dim = params['MLP'], out_dims = len(params['y_labels']) )
+
+print(sum(p.numel() for p in model.parameters()))
+optimizer = optim.Adam(model.parameters(), lr=params['LR'], weight_decay=params['WD'])
+criterion = nn.MSELoss(reduction='none')
