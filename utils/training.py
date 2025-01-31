@@ -118,8 +118,8 @@ def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, sav
             best_epoch = epoch + 1
             print(f'Model saved at epoch {epoch + 1} to {best_model_path}')
 
-        with open(save_path + "_telemetry.txt", "a") as myfile:
-             myfile.write(f'best epoch: {epoch + 1} for R² = {best_val_metric}')
+    with open(save_path + "_telemetry.txt", "a") as myfile:
+            myfile.write(f'best epoch: {epoch + 1} for R² = {best_val_metric}')
 
 
     if save_path:
