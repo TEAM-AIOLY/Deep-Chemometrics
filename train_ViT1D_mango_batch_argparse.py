@@ -109,6 +109,7 @@ if __name__ == "__main__":
         model=ViT_1D(mean = params['mean'], std = params['std'], seq_len = params['spec_dims'], patch_size = params['PS'], 
                     dim_embed = params['DE'], trans_layers = params['TL'], heads = params['HDS'], mlp_dim = params['MLP'], out_dims = len(params['y_labels']) )
         
+        print(sum(p.numel() for p in model.parameters()))
         optimizer = optim.Adam(model.parameters(), lr=params['LR'], weight_decay=params['WD'])
         criterion = nn.MSELoss(reduction='none')
         
@@ -176,7 +177,9 @@ if __name__ == "__main__":
         "shift":params['shift'],
         "CCC": CCC,
         "r2": r2,
-        "rmsep":rmsep
+        "rmsep":rmsep,
+        "N parameters" : sum(p.numel() for p in model.parameters()),
+        "model_name": params["model_name"]
         }
         
             
