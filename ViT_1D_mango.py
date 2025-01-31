@@ -26,7 +26,7 @@ params = {
     "dataset_type": "VisNIR",
     "data_path": data_path,  
     "y_labels": ['dm_mango'],
-    "batch_size": 512,
+    "batch_size": 256,
     "num_epochs": 1000,
     "model_name": "_ViT1D_Mango",
     "seed": 42,
