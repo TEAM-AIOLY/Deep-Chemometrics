@@ -18,7 +18,7 @@ from utils.testing import test
 
             
             
-data_path= "./data/dataset/Mango/mango_dm_full_outlier_removed2.mat",  
+data_path= "./data/dataset/Mango/mango_dm_full_outlier_removed2.mat" 
 data = sp.io.loadmat(data_path)
 print(data.keys())
 
@@ -26,8 +26,8 @@ params = {
     "dataset_type": "VisNIR",
     "data_path": data_path,  
     "y_labels": ['dm_mango'],
-    "batch_size": 1024,
-    "num_epochs": 2000,
+    "batch_size": 512,
+    "num_epochs": 1000,
     "model_name": "_ViT1D_Mango",
     "seed": 42,
     "spec_dims": None,
@@ -78,6 +78,8 @@ std = np.std(x_cal, axis=0)
 mean = torch.tensor(mean)
 std = torch.tensor(std)
 
+params['mean'] =mean
+params['std'] =std
 
 cal = MangoDataset(x_cal,y_cal, transform=data_augmentation(slope=params['slope'], offset=params['offset'], noise=params['noise'], shift=params['shift']))
 cal_loader = data_utils.DataLoader(cal, batch_size=1024, shuffle=True)
