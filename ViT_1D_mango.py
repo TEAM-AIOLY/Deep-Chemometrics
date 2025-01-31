@@ -82,14 +82,14 @@ params['mean'] =mean
 params['std'] =std
 
 cal = MangoDataset(x_cal,y_cal, transform=data_augmentation(slope=params['slope'], offset=params['offset'], noise=params['noise'], shift=params['shift']))
-cal_loader = data_utils.DataLoader(cal, batch_size=1024, shuffle=True)
+cal_loader = data_utils.DataLoader(cal, batch_size=params['batch_size'], shuffle=True)
 
 
 val = data_utils.TensorDataset(torch.Tensor(x_val), torch.Tensor(y_val))
-val_loader = data_utils.DataLoader(val, batch_size=1024, shuffle=True)
+val_loader = data_utils.DataLoader(val, batch_size=params['batch_size'], shuffle=True)
 
 test_dt = data_utils.TensorDataset(torch.Tensor(Xtest), torch.Tensor(Ytest))
-test_loader = data_utils.DataLoader(test_dt, batch_size=1024, shuffle=True)
+test_loader = data_utils.DataLoader(test_dt, batch_size=params['batch_size'], shuffle=True)
 
 spec_dims = x_cal.shape[1]
 params['spec_dims']=spec_dims
