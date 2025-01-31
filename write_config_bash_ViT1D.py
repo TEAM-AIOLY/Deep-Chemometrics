@@ -13,10 +13,10 @@ base_params = {
     "spec_dims": None,
     "mean": None,
     "std": None,
-    "slope": 0.2,
-    "offset": 0.2,
-    "noise": 0.002,
-    "shift": 0.05
+    "slope": 0.1,
+    "offset": 0.1,
+    "noise": 0.0005,
+    "shift": 0.1
 }
 
 # List of different possible y_labels
@@ -45,16 +45,16 @@ os.makedirs(os.path.dirname(param_file), exist_ok=True)
     
 
 param_variations = [
-    {"LR": 0.001, "WD": 0.0055, "PS": 32, "DE": 16, "TL": 4, "HDS": 4, "MLP": 16},
-    {"LR": 0.0009, "WD": 0.0052, "PS": 48, "DE": 16, "TL": 4, "HDS": 4, "MLP": 16},
-    {"LR": 0.0008, "WD": 0.005, "PS": 64, "DE": 24, "TL": 6, "HDS": 6, "MLP": 24},
-    {"LR": 0.0004, "WD": 0.0038, "PS": 64, "DE": 16, "TL": 6, "HDS": 6, "MLP": 24},
-    {"LR": 0.0007, "WD": 0.0048, "PS": 80, "DE": 24, "TL": 8, "HDS": 8, "MLP": 24},
-    {"LR": 0.00035, "WD": 0.0035, "PS": 96, "DE": 32, "TL": 10, "HDS": 10, "MLP": 32},
-    {"LR": 0.0006, "WD": 0.0045, "PS": 112, "DE": 36, "TL": 12, "HDS": 12, "MLP": 36},
-    {"LR": 0.0005, "WD": 0.004, "PS": 128, "DE": 48, "TL": 14, "HDS": 14, "MLP": 48},
-    {"LR": 0.0003, "WD": 0.003, "PS": 96, "DE": 32, "TL": 10, "HDS": 10, "MLP": 40},
-    {"LR": 0.0002, "WD": 0.0025, "PS": 112, "DE": 36, "TL": 12, "HDS": 12, "MLP": 48}
+    {"LR": 0.01, "WD": 0.0015, "PS": 32, "DE": 16, "TL": 4, "HDS": 4, "MLP": 16},
+    {"LR": 0.009, "WD": 0.0015, "PS": 48, "DE": 16, "TL": 4, "HDS": 4, "MLP": 16},
+    {"LR": 0.008, "WD": 0.0015, "PS": 64, "DE": 24, "TL": 6, "HDS": 6, "MLP": 24},
+    {"LR": 0.004, "WD": 0.0015, "PS": 64, "DE": 16, "TL": 6, "HDS": 6, "MLP": 24},
+    {"LR": 0.007, "WD": 0.0015, "PS": 80, "DE": 24, "TL": 8, "HDS": 8, "MLP": 24},
+    {"LR": 0.0035, "WD": 0.0015, "PS": 96, "DE": 32, "TL": 10, "HDS": 10, "MLP": 32},
+    {"LR": 0.006, "WD": 0.0015, "PS": 112, "DE": 36, "TL": 12, "HDS": 12, "MLP": 36},
+    {"LR": 0.005, "WD": 0.0015, "PS": 128, "DE": 48, "TL": 14, "HDS": 14, "MLP": 48},
+    {"LR": 0.003, "WD": 0.0015, "PS": 96, "DE": 32, "TL": 10, "HDS": 10, "MLP": 40},
+    {"LR": 0.002, "WD": 0.0015, "PS": 112, "DE": 36, "TL": 12, "HDS": 12, "MLP": 48}
 ]
 
 # Add the variations to the param list
