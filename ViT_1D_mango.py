@@ -22,7 +22,7 @@ data_path= "./data/dataset/Mango/mango_dm_full_outlier_removed2.mat",
 data = sp.io.loadmat(data_path)
 print(data.keys())
 
-base_params = {
+params = {
     "dataset_type": "VisNIR",
     "data_path": data_path,  
     "y_labels": ['dm_mango'],
@@ -39,13 +39,10 @@ base_params = {
     "noise": 0.0005,
     "shift": 0.1,
     
-     "LR": 0.01, "WD": 0.0015, "PS": 10, "DE": 64, "TL": 8, "HDS": 8, "MLP": 64
+     "LR": 0.01, "WD": 0.0015, "PS": 10, "DE": 64, "TL": 8, "HDS": 8, "MLP": 64,
+     "DP" : 0.5,
+     "ID" : 'optim'
 }
-
-model = ViT_1D(mean = mean,std = std, seq_len = spec_dims, patch_size = 10, dim_embed = 64, trans_layers = 8, heads = 8, mlp_dim = 64, out_dims =1, dropout=0.5) 
-optimizer = optim.Adam(model.parameters(), lr=LR, weight_decay=0.003/2)
-
-
 
 
 Ycal = data["DM_cal"]
@@ -96,8 +93,18 @@ spec_dims = x_cal.shape[1]
 params['spec_dims']=spec_dims
 
 model=ViT_1D(mean = params['mean'], std = params['std'], seq_len = params['spec_dims'], patch_size = params['PS'], 
-            dim_embed = params['DE'], trans_layers = params['TL'], heads = params['HDS'], mlp_dim = params['MLP'], out_dims = len(params['y_labels']) )
+                    dim_embed = params['DE'], trans_layers = params['TL'], heads = params['HDS'], mlp_dim = params['MLP'], out_dims = 1,dropout= params['DP'])
+optimizer = optim.Adam(model.parameters(), lr=params['LR'], weight_decay=params['WD'])
+
 
 print(sum(p.numel() for p in model.parameters()))
-optimizer = optim.Adam(model.parameters(), lr=params['LR'], weight_decay=params['WD'])
+
 criterion = nn.MSELoss(reduction='none')
+
+base_path =os.path.dirname(params['data_path'])+f"/model_benchmark/Mango_dm/{params['model_name']}/run_{params['ID']}"
+os.makedirs(base_path, exist_ok=True)
+print(base_path)
+    
+
+train_losses, val_losses,val_r2_scores,best_model_path,best_epoch = train(model, optimizer, criterion, cal_loader, val_loader, 
+                                num_epochs=params['num_epochs'],save_path=base_path)
