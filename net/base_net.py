@@ -212,6 +212,65 @@ class CuiNetJCB1(nn.Module):
 
 
 
+
+class CuiNetJCB1x10(nn.Module):
+    def __init__(self, input_dims, mean, std, dropout, out_dims,kernel_size,stride): # JCB 26jan25
+        super(CuiNetJCB1x10, self).__init__()
+        
+        # Layers dimensions
+        conv1d_dims=(input_dims-kernel_size)/stride +1 
+        conv1d_dims=10*conv1d_dims;				# 10 répétitions 
+        self.conv1d_dims=int(conv1d_dims)
+        self.fc1_dims = 36
+        self.fc2_dims = 18
+        self.fc3_dims = 12
+        self.out_dims = out_dims
+        self.dropout= ManualDropout(p=dropout)
+        self.mean = nn.Parameter(torch.tensor(mean).float(),requires_grad=False)
+        self.std = nn.Parameter(torch.tensor(std).float(),requires_grad=False)
+        
+        # Convolutional layer
+        self.conv1d = nn.Conv1d(1,10, kernel_size, stride)
+        
+        # Fully connected layers
+        self.fc1 = nn.Linear(self.conv1d_dims, self.fc1_dims)
+        self.fc2 = nn.Linear(self.fc1_dims, self.fc2_dims)
+        self.fc3 = nn.Linear(self.fc2_dims, self.fc3_dims)
+        self.out = nn.Linear(self.fc3_dims, self.out_dims)
+        
+        # Initialize weights with He normal
+        self._initialize_weights()
+        
+    def _initialize_weights(self):
+        for m in self.modules():
+            if isinstance(m, nn.Conv1d) or isinstance(m, nn.Linear):
+                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+                if m.bias is not None:
+                    nn.init.constant_(m.bias, 0)
+        
+    def forward(self, x):
+        # Reshape input
+        x = (x-self.mean)/self.std
+        # Convolutional layer with ELU activation
+        x = F.elu(self.conv1d(x))
+        
+        # Flatten the output from conv1d
+        x = x.view(x.size(0), -1)
+        
+        # Fully connected layers with ELU activation
+        x = F.elu(self.fc1(x))
+        x = F.elu(self.fc2(x))
+        x = F.elu(self.fc3(x))
+        x = self.dropout(x)
+        # Output layer with linear activation
+        x = self.out(x)
+        return x
+
+
+
+
+
+
 class CuiNetJCB3(nn.Module):      # 2 coucles de convolution 
     def __init__(self, input_dims, mean, std, dropout, out_dims, kernel_size1, stride1,kernel_size2,stride2):
         super(CuiNetJCB3, self).__init__()
@@ -271,6 +330,85 @@ class CuiNetJCB3(nn.Module):      # 2 coucles de convolution
         x = self.out(x)
         return x
 
+
+class CuiNetJCB4(nn.Module):      # 2 coucles de convolution 
+    def __init__(self, input_dims, mean, std, dropout, out_dims, kernel_size1, stride1,kernel_size2,stride2):
+        super(CuiNetJCB4, self).__init__()
+        
+        
+        # Layers dimensions
+        conv1d1_dims = (input_dims- kernel_size1)/stride1 +1                     # JCB 22jan25
+        conv1d2_dims = math.floor((conv1d1_dims-kernel_size2)/stride2 +1)                    # JCB 26jan25  
+        conv1d1_dims = 2*conv1d1_dims
+        conv1d2_dims = 4*conv1d2_dims						 # JCB 27jan25 selon l.298
+        self.conv1d1_dims= int(conv1d1_dims)
+        self.conv1d2_dims= int(conv1d2_dims)
+        
+        print(input_dims)
+        print(kernel_size1)
+        print(stride1)
+        print(kernel_size2)
+        print(stride2)
+        
+        
+        print('conv1d1_dims')
+        print(conv1d1_dims)
+        print('conv1d2_dims')
+        print(conv1d2_dims)
+ 
+        # size of the spectrum after the two conv1D
+        self.fc1_dims = 36
+        self.fc2_dims = 18
+        self.fc3_dims = 12
+        self.out_dims = out_dims
+        self.dropout= ManualDropout(p=dropout)
+        self.mean = nn.Parameter(torch.tensor(mean).float(),requires_grad=False)
+        self.std = nn.Parameter(torch.tensor(std).float(),requires_grad=False)
+        
+        # Convolutional layer
+        self.conv1d1 = nn.Conv1d(1,2, kernel_size1, stride1)			
+        #self.avg_d1  = nn.AvgPool1d(2)						# 28jan
+        self.conv1d2 = nn.Conv1d(2,4, kernel_size2, stride2)                    
+        #self.avg_d2  = nn.AvgPool1d(2)
+        
+        # Fully connected layers
+        self.fc1 = nn.Linear(self.conv1d2_dims, self.fc1_dims)                  
+        self.fc2 = nn.Linear(self.fc1_dims, self.fc2_dims)
+        self.fc3 = nn.Linear(self.fc2_dims, self.fc3_dims)
+        self.out = nn.Linear(self.fc3_dims, self.out_dims)
+        
+        # Initialize weights with He normal
+        self._initialize_weights()
+        
+    def _initialize_weights(self):
+        for m in self.modules():
+            if isinstance(m, nn.Conv1d) or isinstance(m, nn.Linear):
+                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+                if m.bias is not None:
+                    nn.init.constant_(m.bias, 0)
+        
+    def forward(self, x):
+        # Reshape input
+        x = (x-self.mean)/self.std
+        # Convolutional layer with ELU activation      
+        x = F.elu(self.conv1d1(x))
+        #x = self.avg_d1(x)                             # 28jan
+        x = F.elu(self.conv1d2(x))    
+        #x = self.avg_d2(x)                             
+        
+        # Flatten the output from conv1d
+        x = x.view(x.size(0), -1)
+        
+        print(x.shape)
+        
+        # Fully connected layers with ELU activation
+        x = F.elu(self.fc1(x))
+        x = F.elu(self.fc2(x))
+        x = F.elu(self.fc3(x))
+        x = self.dropout(x)
+        # Output layer with linear activation
+        x = self.out(x)
+        return x
 
 
 
