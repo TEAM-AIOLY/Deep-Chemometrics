@@ -2,29 +2,6 @@ import os
 import json
 
 
-params = {
-    "dataset_type": "VisNIR",
-    "data_path": data_path,  
-    "y_labels": ['dm_mango'],
-    "batch_size": 512,
-    "num_epochs": 2000,
-    "model_name": "_ViT1D_Mango",
-    "seed": 42,
-    "spec_dims": None,
-    "mean": None,
-    "std": None,
-    
-    "slope": 0.,
-    "offset": 0.,
-    "noise": 0.00005,
-    "shift": 0.,
-    
-     "LR": 0.01, "WD": 0.0015, "PS": 10, "DE": 64, "TL": 8, "HDS": 8, "MLP": 64,
-     "DP" : 0.5,
-     "ID" : 'optim'
-}
-
-
 base_params = {
     "dataset_type": "VisNIR",
     "data_path": "./data/dataset/Mango/mango_dm_full_outlier_removed2.mat",  
@@ -59,9 +36,10 @@ param_variations = [
        { "LR": 0.02, "WD": 0.0015, "PS": 10, "DE": 64, "TL": 8, "HDS": 8, "MLP": 64},
        { "LR": 0.01, "WD": 0.0015, "PS": 10, "DE": 64, "TL": 8, "HDS": 8, "MLP": 32},
        { "LR": 0.01, "WD": 0.0015, "PS": 10, "DE": 32, "TL": 8, "HDS": 8, "MLP": 32},
-       { "LR": 0.01, "WD": 0.0015, "PS": 20, "DE": 64, "TL": 16, "HDS": 16, "MLP": 32},
-       { "LR": 0.01, "WD": 0.0015, "PS": 20, "DE": 64, "TL": 16, "HDS": 16, "MLP": 64},
-       { "LR": 0.01, "WD": 0.0015, "PS": 32, "DE": 64, "TL": 16, "HDS": 16, "MLP": 64},
+       { "LR": 0.01, "WD": 0.0015, "PS": 8, "DE": 64, "TL": 16, "HDS": 16, "MLP": 32},
+       { "LR": 0.01, "WD": 0.0015, "PS": 8, "DE": 64, "TL": 16, "HDS": 16, "MLP": 64},
+       { "LR": 0.01, "WD": 0.0015, "PS": 4, "DE": 64, "TL": 16, "HDS": 16, "MLP": 64},
+       { "LR": 0.01, "WD": 0.0015, "PS": 4, "DE": 32, "TL": 16, "HDS": 16, "MLP": 64}
 ]
 
 # Add the variations to the param list

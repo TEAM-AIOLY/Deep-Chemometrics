@@ -47,7 +47,8 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"Error during execution: {e}")
           
-    for idx,params in enumerate(params_dict):    
+    for idx,params in enumerate(params_dict): 
+       if idx > 2:    
         print(f"train with parameter set run_{params['ID']}")
             
         augmentation = data_augmentation(slope=params['slope'], offset=params['offset'], noise=params['noise'], shift=params['shift'])
