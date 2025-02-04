@@ -4,7 +4,7 @@ PYTHON_SCRIPT="./train_ViT1D_batch_argparse.py"
 
 # Specify the path to your JSON configuration file
 # CONFIG_FILE="./data/dataset/Mango/config/_ViT1D_Mango_optim(dm_mango).json"
-CONFIG_FILE="./data/dataset/ossl/config/ViT1D/config_batch.json"
+CONFIG_FILE="./data/dataset/ossl/config/_ViT1D_(oc_us).json"
 
 
 
