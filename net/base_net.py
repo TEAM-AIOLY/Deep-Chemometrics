@@ -219,13 +219,15 @@ class CuiNetJCB1x10(nn.Module):
         
         # Layers dimensions
         conv1d_dims=(input_dims-kernel_size)/stride +1 
+        conv1d_dims=math.floor(conv1d_dims);                         # 9fev25
         conv1d_dims=10*conv1d_dims;				# 10 répétitions 
+        
         self.conv1d_dims=int(conv1d_dims)
         self.fc1_dims = 36
         self.fc2_dims = 18
         self.fc3_dims = 12
         self.out_dims = out_dims
-        self.dropout= ManualDropout(p=dropout)
+        self.dropout=nn.Dropout(p=dropout)
         self.mean = nn.Parameter(torch.tensor(mean).float(),requires_grad=False)
         self.std = nn.Parameter(torch.tensor(std).float(),requires_grad=False)
         
@@ -251,6 +253,7 @@ class CuiNetJCB1x10(nn.Module):
     def forward(self, x):
         # Reshape input
         x = (x-self.mean)/self.std
+  
         # Convolutional layer with ELU activation
         x = F.elu(self.conv1d(x))
         
@@ -262,6 +265,7 @@ class CuiNetJCB1x10(nn.Module):
         x = F.elu(self.fc2(x))
         x = F.elu(self.fc3(x))
         x = self.dropout(x)
+ 
         # Output layer with linear activation
         x = self.out(x)
         return x
