@@ -49,21 +49,24 @@ def test(model, model_path, test_loader,classification = True) :
     model.to(device)
     with torch.no_grad():
         for inputs, targets in test_loader:
-            Y += targets.to("cpu")
+            Y += targets.to("cpu")[None]
             inputs = inputs.to(device,non_blocking=True).float()
             outputs = model(inputs[:,None])
-            y_pred += outputs.to("cpu")
+            y_pred += outputs.to("cpu")[None]
 
-
-    Y = np.array(Y)
-    y_pred = np.array(y_pred)
-
+    Y=np.array(torch.cat(Y,dim=0))
+    y_pred = np.array(torch.cat(y_pred,dim=0))
+    #Y = np.array(Y)
+    #y_pred = np.array(y_pred)
+    print(Y.shape)
+    
     if classification :
         #affichage de la matrice de confusion
         #y_pred = torch.Tensor(y_pred)
         #y_pred = y_pred.softmax(1)
-        y_pred = np.exp(y_pred) / np.sum(np.exp(y_pred), axis=1, keepdims=True)
         print(y_pred.shape)
+        y_pred = np.exp(y_pred) / np.sum(np.exp(y_pred), axis=1, keepdims=True)
+        #print(y_pred.shape)
         from sklearn.metrics import classification_report, confusion_matrix
         y_pred = np.argmax(y_pred, axis = 1)
         Y = np.argmax(Y, axis = 1)
