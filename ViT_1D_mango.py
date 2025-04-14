@@ -99,7 +99,7 @@ model=ViT_1D(mean = params['mean'], std = params['std'], seq_len = params['spec_
 optimizer = optim.Adam(model.parameters(), lr=params['LR'], weight_decay=params['WD'])
 
 
-print(sum(p.numel() for p in model.parameters()))
+print(sum(p.numel() for p in model.parameters() if p.requires_grad))
 
 criterion = nn.MSELoss(reduction='none')
 
