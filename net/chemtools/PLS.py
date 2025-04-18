@@ -1,7 +1,7 @@
 import torch
 from net.chemtools.metrics import ccc,r2_score
 import torch.nn.functional as F
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+
 
 
 class PLS:
@@ -116,95 +116,138 @@ class PLS:
 
 
 
-class PLSDA(PLS):
-    def __init__(self, ncomp, weights=None):
-        super().__init__(ncomp, weights)
-        self.lda = None  # LDA model will be initialized after PLS fitting
-        self.lda_scores = None  # LDA scores (projections)
-        self.lda_loadings = None  # LDA loadings (discriminant vectors)
-
-    def fit(self, X, Y, class_labels):
+class LDA:
+    def __init__(self, prior="unif"):
         """
-        Fit the PLS model and then perform LDA on the PLS scores.
-        
+        Initialize the LDA class.
         Args:
-            X (torch.Tensor or np.ndarray): Predictor variables.
-            Y (torch.Tensor or np.ndarray): Response variables.
-            class_labels (array-like): Class labels for LDA (conjunctive labels).
+            prior (str): Prior probabilities. Options are "unif" (uniform) or "prop" (proportional).
         """
-        if not isinstance(Y, torch.Tensor):
-            Y = torch.tensor(Y, dtype=torch.float64)    
-        # Convert disjunctive labels (Y) to conjunctive labels if needed
-        if Y.ndim > 1:  # Check if Y is one-hot encoded
-            class_labels = torch.argmax(Y, dim=1).numpy()  # Convert to class indices
+        self.prior = prior
+        self.ct = None  # Class means
+        self.W = None   # Within-class covariance matrix
+        self.wprior = None  # Weighted priors
+        self.lev = None  # Class labels
+        self.ni = None   # Number of samples per class
+    def fit(self, X, y):
+        """
+        Fit the LDA model.
+
+        Args:
+            X (torch.Tensor): Predictor variables (n_samples, n_features).
+            y (torch.Tensor): Class labels (n_samples, n_classes), one-hot encoded.
+        """
+        # Ensure X and y are tensors
+        if not isinstance(X, torch.Tensor):
+            X = torch.tensor(X, dtype=torch.float64)
         else:
-            class_labels = class_labels  # Use provided class_labels directly
-        # Fit the PLS model
+            X = X.clone().detach().to(dtype=torch.float64)
+
+        if not isinstance(y, torch.Tensor):
+            y = torch.tensor(y, dtype=torch.float64)
+        else:
+            y = y.clone().detach()
+
+        # Ensure y is 2D and one-hot encoded
+        if y.ndim != 2:
+            raise ValueError("y must be a 2D tensor (one-hot encoded).")
+
+        n, p = X.shape  # Number of samples and features
+        n_classes = y.shape[1]  # Number of classes
+
+        # Compute class sample sizes (sum of one-hot encoded values for each class)
+        self.ni = y.sum(dim=0)  # Shape: (n_classes,)
+
+        # Compute class means (weighted by one-hot encoding)
+        self.ct = (y.T @ X) / self.ni[:, None]  # Shape: (n_classes, n_features)
+
+        # Compute prior probabilities
+        if self.prior == "unif":
+            self.wprior = torch.ones(n_classes, dtype=torch.float64) / n_classes
+        elif self.prior == "prop":
+            self.wprior = self.ni / self.ni.sum()
+
+        # Compute within-class scatter matrix
+        W = torch.zeros((p, p), dtype=torch.float64)
+        for i in range(n_classes):
+            diff = X - self.ct[i]  # Difference between samples and class mean
+            weighted_diff = (y[:, i][:, None] * diff)  # Weight by one-hot encoding
+            W += weighted_diff.T @ diff
+        self.W = W / (n - n_classes)  # Normalize by degrees of freedom
+   
+    def predict(self, X):
+        """
+        Predict class probabilities for new data.
+
+        Args:
+            X (torch.Tensor): New predictor variables (n_samples, n_features).
+
+        Returns:
+            torch.Tensor: Posterior probabilities for each class (n_samples, n_classes).
+        """
+        # Ensure X is a tensor
+        if not isinstance(X, torch.Tensor):
+            X = torch.tensor(X, dtype=torch.float64)
+        else:
+            X = X.clone().detach().to(dtype=torch.float64)
+            
+        m, p = X.shape  # Number of samples and features
+        n_classes = self.ct.shape[0]  # Number of classes
+
+        # Compute discriminant scores
+        ds = torch.zeros((m, n_classes), dtype=torch.float64)
+        inv_W = torch.inverse(self.W)
+        for i in range(n_classes):
+            diff = X - self.ct[i]
+            ds[:, i] = -0.5 * torch.sum(diff @ inv_W * diff, dim=1)  # Quadratic term
+            ds[:, i] += torch.log(self.wprior[i])  # Add log-prior
+
+        # Compute posterior probabilities
+        posterior = torch.exp(ds - torch.max(ds, dim=1, keepdim=True).values)  # Avoid numerical underflow
+        posterior /= posterior.sum(dim=1, keepdim=True)
+
+        return posterior
+
+
+class PLSDA(PLS):
+    def __init__(self, ncomp, weights=None, prior="unif"):
+        super().__init__(ncomp=ncomp, weights=weights)
+        self.lda = LDA(prior=prior)
+        self.proj = None  # final linear discriminant(s)
+
+    def fit(self, X, Y):
+        # Step 1: run PLS to get T scores
         super().fit(X, Y)
+        T = self.T  # Shape: (n_samples, n_components)
 
-        # Perform LDA on the PLS scores
-        scores = self.T.numpy()  # Convert PLS scores to NumPy for LDA
-        self.lda = LinearDiscriminantAnalysis()
-        self.lda.fit(scores, class_labels)
+        # Step 2: LDA in the latent space
+        self.lda.fit(T, Y)
 
-       
-        # LDA scores
-        self.lda_loadings =self.lda.coef_  # LDA loadings (discriminant vectors)
-        self.lda_scores = scores @ self.lda_loadings.T
+        # Step 3: compute projection vector(s)
+        # W: (n_features, n_components), lda.W: (n_components, n_components)
+        # We project to LDA directions in T-space: final proj = W @ lda_vector
+        eigvals, eigvecs = torch.linalg.eigh(self.lda.W)  # from LDA
+        top_eigvec = eigvecs[:, -1]  # take the leading one
 
-    def predict(self, X, nlv=None):
-        """
-        Predict class labels using the LDA model on new data.
-        
-        Args:
-            X (torch.Tensor or np.ndarray): New predictor variables.
-            nlv (int, optional): Number of latent variables to use. Defaults to all components.
-        
-        Returns:
-            np.ndarray: Predicted class labels.
-        """
-        # Transform the new data into PLS scores
-        scores = super().transform(X).numpy()
+        self.proj = self.W @ top_eigvec  # shape: (n_features,)
+        return self
 
-        # Use the LDA model to predict class labels
-        predictions = self.lda.predict(scores)
-        return predictions
+    def transform(self, X):
+        if not isinstance(X, torch.Tensor):
+            X = torch.tensor(X, dtype=torch.float64)
+        else:
+            X = X.clone().detach().to(dtype=torch.float64)
+        X = X - self.xmeans
+        scores = X @ self.proj
+        return scores
 
-    def predict_proba(self, X, nlv=None):
-        """
-        Predict class probabilities using the LDA model on new data.
-        
-        Args:
-            X (torch.Tensor or np.ndarray): New predictor variables.
-            nlv (int, optional): Number of latent variables to use. Defaults to all components.
-        
-        Returns:
-            np.ndarray: Predicted class probabilities.
-        """
-        # Transform the new data into PLS scores
-        scores = super().transform(X).numpy()
+    def predict(self, X):
+        # Project T manually then call lda.predict
+        T_new = super().transform(X)
+        return self.lda.predict(T_new)
 
-        # Use the LDA model to predict class probabilities
-        probabilities = self.lda.predict_proba(scores)
-        return probabilities
 
-    def get_lda_scores(self):
-        """
-        Get the LDA scores (projections of the data onto the discriminant vectors).
-        
-        Returns:
-            np.ndarray: LDA scores.
-        """
-        return self.lda_scores
 
-    def get_lda_loadings(self):
-        """
-        Get the LDA loadings (discriminant vectors).
-        
-        Returns:
-            np.ndarray: LDA loadings.
-        """
-        return self.lda_loadings
 
 
 

@@ -3,9 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from scipy.signal import savgol_filter,detrend
-from net.chemtools.PLS import PLS,PLSDA
-from net.chemtools.metrics import ccc, r2_score
-import torch 
+from net.chemtools.PLS import PLS,PLSDA, LDA
+
 from sklearn.model_selection import train_test_split
 
 data_path='./data/dataset/3rd_data_sampling_and_microbial_data/data 3rd sampling 450-950nm.csv'
@@ -81,56 +80,22 @@ X_train, X_test, y_train, y_test, T_ref_train, T_ref_test = train_test_split(
     spectral_data_dt, mixrobe_data, T_ref, test_size=0.2, random_state=42, shuffle=True
 )
 
-n_components = 20 
-plsda_model = PLSDA(ncomp=n_components)
 
-plsda_model.fit(X_train, y_train, class_labels=y_train)
-y_pred = plsda_model.predict(X_test)
+n_components = 50 
+# plsda =PLSDA(ncomp=n_components)
+# plsda.fit(X_train, y_train)
 
+# y_pred=plsda.predict(X_test)
 
-lda_loadings = plsda_model.lda_loadings  # Discriminant vectors
-plt.figure(figsize=(10, 6))
-for i in range(lda_loadings.shape[0]):  # Iterate over the number of discriminant vectors
-    plt.plot(lda_loadings[i, :], label=f"Discriminant Vector {i+1}")
+pls =PLS(ncomp=n_components)
+pls.fit(X_train, y_train)
+T_new = pls.transform(X_test)
+T= pls.transform(X_train)
 
-plt.title("LDA Loadings (Discriminant Vectors)")
-plt.xlabel("Wavelength (nm)")
-plt.ylabel("Loadings")
-plt.legend()
-plt.grid(True)
-plt.show()
+lda=LDA(prior='unif')
+lda.fit(pls.T,y_train)
+y_train_pred = lda.predict(T)
+y_test_pred = lda.predict(T_new)
 
-
-lda_scores = plsda_model.lda_scores  # LDA scores
-# in one-hot encoding to labels (e.g., "B1 Present", "B2 Absent", etc.)
-num_classes = y_train.shape[1]  # Number of classes (columns in y_train)
-for col_index in range(num_classes):
-    # Determine labels for the current class
-    labels = [f"B{col_index + 1}" if row[col_index] == 1 else "∅" for row in y_train]
-
-    # Plot the LDA scores for components 1 and 2
-    plt.figure(figsize=(10, 6))
-    for i, label in enumerate(labels):
-        plt.scatter(lda_scores[i, 0], lda_scores[i, 1], alpha=0.7)
-        plt.annotate(label, (lda_scores[i, 0], lda_scores[i, 1]), fontsize=8, alpha=0.7)
-
-    plt.title(f"LDA Scores Plot for B{col_index + 1} (First Two Components)")
-    plt.xlabel("LDA Component 1")
-    plt.ylabel("LDA Component 2")
-    plt.grid(True)
-    plt.show();
-    
-    
-    # Plot for components 2 and 3
-    plt.figure(figsize=(10, 6))
-    for i, label in enumerate(labels):
-        plt.scatter(lda_scores[i, 1], lda_scores[i, 2], alpha=0.7)
-        plt.annotate(label, (lda_scores[i, 1], lda_scores[i, 2]), fontsize=8, alpha=0.7)
-    plt.title(f"LDA Scores Plot for B{col_index + 1} (Components 2 and 3)")
-    plt.xlabel("LDA Component 2")
-    plt.ylabel("LDA Component 3")
-    plt.grid(True)
-    plt.show();
-    
-    
-
+print(y_train_pred)
+print(y_test_pred)
