@@ -159,7 +159,10 @@ class LDA:
         self.ni = y.sum(dim=0)  # Shape: (n_classes,)
 
         # Compute class means (weighted by one-hot encoding)
-        self.ct = (y.T @ X) / self.ni[:, None]  # Shape: (n_classes, n_features)
+        self.ct = torch.zeros((n_classes, p), dtype=torch.float64)
+        for i in range(n_classes):
+            if self.ni[i] > 0:
+                self.ct[i] = (y[:, i][:, None] * X).sum(dim=0) / self.ni[i]
 
         # Compute prior probabilities
         if self.prior == "unif":
@@ -174,7 +177,7 @@ class LDA:
             weighted_diff = (y[:, i][:, None] * diff)  # Weight by one-hot encoding
             W += weighted_diff.T @ diff
         self.W = W / (n - n_classes)  # Normalize by degrees of freedom
-   
+        self.W += torch.eye(p, dtype=torch.float64) * 1e-6
     def predict(self, X):
         """
         Predict class probabilities for new data.
@@ -245,10 +248,6 @@ class PLSDA(PLS):
         # Project T manually then call lda.predict
         T_new = super().transform(X)
         return self.lda.predict(T_new)
-
-
-
-
 
 
 
