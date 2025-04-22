@@ -2,13 +2,11 @@ import os
 import json
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy as sp
 from torch.utils.data import DataLoader, random_split
 import pandas as pd 
 
 import torch
 from torch import nn, optim
-import torch.utils.data as data_utils
 from data.load_dataset import SoilSpectralDataSet
 
 from net.base_net import ViT_1D
@@ -36,7 +34,7 @@ def parse_args(file_path):
 
 
 if __name__ == "__main__":
-    config_root= "./data/dataset/Mango/config/_ViT1D_ossl_jz(dm_mango).json"
+    config_root= "data/dataset/ossl/config/_ViT1D_ossl_jz(oc_usda).json"
     config_path =os.path.join(root,config_root)
     try:
         params_dict = parse_args(config_path)
@@ -58,9 +56,11 @@ if __name__ == "__main__":
         data_path=os.path.join(root,params['data_path'])
        
         spectral_data = SoilSpectralDataSet(data_path=params['data_path'], dataset_type=params['dataset_type'], y_labels=params['y_labels'],preprocessing=None)
+        
         params['spec_dims'] = spectral_data.spec_dims
        
         dataset_size = len(spectral_data)
+        print(dataset_size)
         test_size = int(0.2 * dataset_size)
         train_size = dataset_size - test_size
         cal_size = int(0.75 * train_size)
@@ -82,19 +82,17 @@ if __name__ == "__main__":
         mean = torch.zeros(params['spec_dims'])
         std = torch.zeros(params['spec_dims'])
         
-        mean = torch.zeros(params['spec_dims'])
-        std = torch.zeros(params['spec_dims'])
-            
-        for inputs, _ in cal_loader:
-            mean += inputs.sum(dim=0)
+        with torch.no_grad():    
+            for inputs, _ in cal_loader:
+                mean += inputs.sum(dim=0)
 
-        mean /= len(cal_loader.dataset)
+            mean /= len(cal_loader.dataset)
 
-        # Calculate std over the training dataset
-        for inputs, _ in cal_loader:
-            std += ((inputs - mean) ** 2).sum(dim=0)
+            # Calculate std over the training dataset
+            for inputs, _ in cal_loader:
+                std += ((inputs - mean) ** 2).sum(dim=0)
 
-        std = torch.sqrt(std / len(cal_loader.dataset))
+            std = torch.sqrt(std / len(cal_loader.dataset))
         
         params['mean'] = mean
         params['std'] = std
@@ -109,7 +107,7 @@ if __name__ == "__main__":
         optimizer = optim.Adam(model.parameters(), lr=params['LR'], weight_decay=params['WD'])
         criterion = nn.MSELoss(reduction='none')
         
-        base_path =os.path.dirname(data_path)+f"/model_benchmark/Mango_dm/{params['model_name']}/run_{params['ID']}"
+        base_path =os.path.dirname(data_path)+f"/model_benchmark/oC/{params['model_name']}/run_{params['ID']}"
         os.makedirs(base_path, exist_ok=True)
         print(base_path)
         
