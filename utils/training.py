@@ -38,7 +38,7 @@ def train(model, optimizer, criterion, train_loader, val_loader, num_epochs, sav
         for inputs, targets in train_loader:
             
             inputs = inputs.to(device,non_blocking=True).float()
-            targets = targets.to(device).float() 
+            targets = targets.to(device,non_blocking=True).float() 
             optimizer.zero_grad()  # Zero the parameter gradients
             outputs = model(inputs[:,None])  # Forward pass
             loss = criterion(outputs, targets)  # Compute loss

@@ -4,7 +4,8 @@ import json
 
 base_params = {
     "dataset_type": "hyspex",
-    "data_path": "data/dataset/Wheat_dt/",  
+    "data_path": "data/dataset/Wheat_dt/", 
+    "y_labels": ['wheat 30 classes'],
     "nb_classes":30,
     "batch_size": 512,
     "num_epochs": 1000,
@@ -13,8 +14,8 @@ base_params = {
     "spec_dims": None,
     "mean": None,
     "std": None,
-     "DP" : 0.5,
-     "LR": 0.01,
+     "DP" : 0.1,
+     "LR": 0.00001,
      "WD": 0.0015
 }
 
@@ -29,29 +30,19 @@ os.makedirs(os.path.dirname(param_file), exist_ok=True)
     
 
 param_variations = [
-       {   "PS": 32, "DE": 16, "TL": 4, "HDS": 4, "MLP": 16},
-       {   "PS": 32, "DE": 16, "TL": 8, "HDS": 8, "MLP": 16},
-       {   "PS": 32, "DE": 16, "TL": 8, "HDS": 8, "MLP": 32},
-       {   "PS": 32, "DE": 32, "TL": 12, "HDS": 12,"MLP": 32},
-       {   "PS": 32, "DE": 32, "TL": 12, "HDS": 12, "MLP": 64},
-       {   "PS": 32, "DE": 64, "TL": 12, "HDS": 12, "MLP": 64},
-       {   "PS": 32, "DE": 32, "TL": 16, "HDS": 16, "MLP": 32},
-       {   "PS": 64, "DE": 64, "TL": 8, "HDS": 8, "MLP": 32},
-       {   "PS": 64, "DE": 64, "TL": 8, "HDS": 8, "MLP": 64},
-       {   "PS": 64, "DE": 64, "TL": 16, "HDS": 16, "MLP": 32},
-       {   "PS": 64, "DE": 64, "TL": 16, "HDS": 16, "MLP": 64},
-       {   "PS": 96, "DE": 32, "TL": 12, "HDS": 12, "MLP": 32},
-       {   "PS": 96, "DE": 64, "TL": 12, "HDS": 12, "MLP": 32},
-       {   "PS": 96, "DE": 64, "TL": 12, "HDS": 12, "MLP": 64},
-       {   "PS": 96, "DE": 32, "TL": 12, "HDS": 12, "MLP": 32},
-       {   "PS": 96, "DE": 32, "TL": 16, "HDS": 16, "MLP": 32},
-       {   "PS": 96, "DE": 32, "TL": 8, "HDS": 8, "MLP": 32},
-       {   "PS": 128, "DE": 32, "TL": 8, "HDS": 8, "MLP": 32},
-       {   "PS": 128, "DE": 32, "TL": 16, "HDS": 16, "MLP": 32},
-       {   "PS": 128, "DE": 64, "TL": 16, "HDS": 16, "MLP": 64},
-       {   "PS": 128, "DE": 32, "TL": 24, "HDS": 16, "MLP": 32},
-       
-           
+       {   "PS": 8, "DE": 64, "TL": 12, "HDS": 8, "MLP": 128},
+       {   "PS": 12, "DE": 64, "TL": 12, "HDS": 8, "MLP": 128},
+       {   "PS": 12, "DE": 64, "TL": 16, "HDS": 12, "MLP": 128},
+       {   "PS": 12, "DE": 64, "TL": 16, "HDS": 8, "MLP": 256},
+       {   "PS": 12, "DE": 128, "TL": 20, "HDS": 16, "MLP": 256},
+       {   "PS": 16, "DE": 64, "TL": 12, "HDS": 8, "MLP": 128},
+       {   "PS": 16, "DE": 64, "TL": 16, "HDS": 12, "MLP": 128},
+       {   "PS": 16, "DE": 64, "TL": 16, "HDS": 8, "MLP": 256},
+       {   "PS": 16, "DE": 128, "TL": 20, "HDS": 16, "MLP": 128},
+       {   "PS": 24, "DE": 64, "TL": 12, "HDS": 8, "MLP": 128},
+       {   "PS": 24, "DE": 128, "TL": 16, "HDS": 12, "MLP": 128},
+       {   "PS": 24, "DE": 64, "TL": 16, "HDS": 8, "MLP": 256},
+       {   "PS": 24, "DE": 128, "TL": 20, "HDS": 16, "MLP": 256},
 ]
 
 # Add the variations to the param list
