@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import savgol_filter,detrend
-from net.chemtools.PLS import PLS,LDA, QDA
+from net.chemtools.PLS import PLS, MLDA
 
 
 from sklearn.model_selection import train_test_split
@@ -60,20 +60,17 @@ X_train, X_test, y_train, y_test,  = train_test_split(
     X_pp, class_array, test_size=0.2, random_state=42, shuffle=True
 )
 
-n_components=20
+n_components=5
 pls =PLS(ncomp=n_components)
 pls.fit(X_train,y_train)
 
 T_train = pls.transform(X_train)
 T_test =pls.transform(X_test)
 
-qda =QDA()
-qda.fit(T_train,y_train)
+mlda =MLDA()
+mlda.fit(T_train,y_train)
+preds =mlda.transform(T_test)
+classes=mlda.predict(T_test)
 
-classes=qda.predict(T_test)
-
-# lda =LDA()
-# lda.fit(T_train,y_train)
-# preds=lda.transform(T_test)
-# classes=lda.predict(T_test)
-
+print(preds)
+print(y_test)

@@ -50,6 +50,12 @@ y_microbe_array = y_microbe_array.T
 class_array =(y_class.values[:,1:]).astype(float)
 class_array = np.repeat(class_array, 4, axis=0)
 
+mat_data = {
+    'wv': wv,
+    'X': X,
+    'y_microbe': y_microbe_array,
+    'class_array': class_array
+}
 
 ############################################################################################
 ############################################################################################
@@ -135,7 +141,7 @@ X_train, X_test, y_train, y_test,  = train_test_split(
     X_pp, y_microbe_array, test_size=0.2, random_state=42, shuffle=True
 )
 
-n_components = 20       
+n_components = 5       
 
 plsr = PLS(ncomp=n_components)
 
@@ -154,23 +160,20 @@ preds =mlda.transform(scores_test)
 # print(y_test)
 classes =mlda.predict(scores_test)
 # print(preds)
-
-
 proj =mlda.projections
 
 
-# Create 2D plots
-create_2d_plot(preds, y_test, label_names, axis_pairs, save_path, show=False)
-# Create 3D plots
-create_3d_discriminant_plots(preds, y_test, proj, label_names, save_path, show=False)
-create_3d_discriminant_plots_mpl(preds, y_test, proj, label_names, save_path, show=False)
+# # Create 2D plots
+# create_2d_plot(preds, y_test, label_names, axis_pairs, save_path, show=False)
+# # Create 3D plots
+# create_3d_discriminant_plots(preds, y_test, proj, label_names, save_path, show=False)
+# create_3d_discriminant_plots_mpl(preds, y_test, proj, label_names, save_path, show=False)
 
 
 
-
-
+############################################################################################
+############################################################################################
 W =(plsr.W)
-
 DV = (W@proj.T).T 
 DV = np.array(DV)
 print(DV.shape)
@@ -179,32 +182,25 @@ plt.figure()
 for i in range(DV.shape[0]):
     plt.plot(wv,DV[i,:])
 plt.title('Discriminant Vectors (DV) in spectral space')
-dv_path =os.path.join(base_save_path,"discrimiannt vector da.pdf")
+dv_path =os.path.join(base_save_path,"discrimiannt_vector_da_5lv.pdf")
+plt.savefig(dv_path, bbox_inches='tight')
 plt.xlabel("wavelength (nm)")
 plt.grid(True)
-plt.savefig(dv_path, bbox_inches='tight')
+# plt.show()
 
 
+# plt.figure()
+# for i in range(proj.shape[0]):
+#     plt.plot(proj[i,:])
+# plt.title('Discriminant Vectors (DV) in latent space')
+# dv_path =os.path.join(base_save_path,"discrimiannt vector pls.pdf")
+# plt.xlabel("Latent variables")
+# plt.xticks(np.arange(0,n_components,1))
+# plt.grid(True)
+# # plt.savefig(dv_path, bbox_inches='tight')
+# plt.show()
+############################################################################################
+############################################################################################
 
-
-plt.figure()
-for i in range(proj.shape[0]):
-    plt.plot(proj[i,:])
-plt.title('Discriminant Vectors (DV) in latent space')
-dv_path =os.path.join(base_save_path,"discrimiannt vector pls.pdf")
-plt.xlabel("Latent variables")
-plt.xticks(np.arange(0,n_components,1))
-plt.grid(True)
-plt.savefig(dv_path, bbox_inches='tight')
-
-
-
-
-
-
-# proj = mlda.W
-# W =(plsr.W).float()
-# DV = (W@proj.T).T 
-# DV = np.array(DV)
 
 

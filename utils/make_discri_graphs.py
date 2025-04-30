@@ -5,6 +5,7 @@ import numpy as np
 from itertools import combinations
 import torch
 from mpl_toolkits.mplot3d import Axes3D
+import pickle
 
 def create_2d_plot(preds, y_test, label_names, axis_pairs, save_path, show=False):
     color_map = {1: 'blue', 0: 'red'}
