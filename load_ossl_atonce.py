@@ -8,8 +8,8 @@ from sklearn.decomposition import PCA
 import torch
 import torch.nn.functional as F
 
-from net.chemtools.PLS import PLS
-from net.chemtools.LWPLSR import LWPLSR
+from models.chemtools.PLS import PLS
+from models.chemtools.LWPLSR import LWPLSR
 
 if __name__ == "__main__":
     

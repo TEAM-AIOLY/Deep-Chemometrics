@@ -1,0 +1,27 @@
+
+Dario Pasos tutorial : https://github.com/dario-passos/DeepLearning_for_VIS-NIR_Spectra/tree/master/notebooks/Tutorial_on_DL_optimization 
+
+DATA USED IN THE REGRESSION TUTORIAL:
+
+The data set used in this study has a total of 11,691 NIR spectra (684–990 ​nm in 3 ​nm sampling with a total 103 variables) 
+and Dry Matter (DM %) measurements performed on 4675 mango fruit across 4 harvest seasons 2015, 2016, 2017 and 2018.
+The provided data set has been cleaned by removing a few outliers from the original data by using Hotelling’s T2 and Q 
+statistics from a PLS decomposition. Final number of spectra is 11,362.
+
+File name: mango_dm_full_outlier_removed2.mat
+File type: MATLAB
+
+More details about this version of the data in:
+P. Mishra, D. Passos, A synergistic use of chemometrics and deep learning improved the predictive performance 
+of near-infrared spectroscopy models for dry matter prediction in mango fruit, Chemometrics and Intelligent 
+Laboratory Systems, (2021) 104287
+https://doi.org/10.1016/j.chemolab.2021.104287
+
+and the original data set: https://data.mendeley.com/datasets/46htwnp833/2
+
+N.T. Anderson, K.B. Walsh, P.P. Subedi, C.H. Hayes, Achieving robustness across season, 
+location and cultivar for a NIRS model for intact mango fruit dry matter content, 
+Postharvest Biology and Technology, 168 (2020) 111202.
+https://doi.org/10.1016/j.postharvbio.2020.111202
+
+This paper found mean centred 2nd derivative with polynomial order of 2 and window size of 17 to be the best. Padding ?

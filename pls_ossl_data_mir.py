@@ -8,7 +8,7 @@ from sklearn.decomposition import PCA
 import torch
 import torch.nn.functional as F
 
-from net.chemtools.PLS import PLS
+from models.chemtools.PLS import PLS
 from utils.testing import ccc,r2_score
 import pickle
 

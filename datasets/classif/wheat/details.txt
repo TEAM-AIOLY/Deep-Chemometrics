@@ -1,0 +1,22 @@
+Dario Pasos tutorial : https://github.com/dario-passos/DeepLearning_for_VIS-NIR_Spectra/tree/master/notebooks/Tutorial_on_DL_optimization 
+
+DATA USED IN THE CLASSIFICATION TUTORIAL:
+
+The wheat dataset shared here is a copy of the original dataset available at https://github.com/L-Zhou17/Wheat-kernels
+It contains a NIR spectral dataset of wheat kernels of 30 varieties. 
+Columns 1 to 200 correspond to the spectral variables and the last column contains the varieties labels. 975–1,645 nm
+According to the instructions of the authors (Zhou et al 2020), 
+i) DT_train-1.csv,DT_train-2.csv,DT_train-3.csv,DT_train-4.csv,DT_train-5.csv, are concatenated (vertically) and redifined as training data
+ii) The same is used to create the validation set from 'DT_val#.csv', files and
+iii) the test set from 'DT_test#.csv' files.
+
+File names: DT_###.csv
+File types: Comma Separated Values (.csv)
+
+More details about the data in: 
+L. Zhou, C. Zhang, M.F. Taha, X. Wei, Y. He, Z. Qiu, Y. Liu, Wheat kernel variety
+identification based on a large near-infrared spectral dataset and a novel deep
+learning-based feature selection method, Front. Plant Sci. 11 (2020) 1682.
+https://doi.org/10.3389/fpls.2020.575810
+
+The authors apply PLSDA without doig any preprocessing...
