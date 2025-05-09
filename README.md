@@ -38,9 +38,3 @@ Deep Residual Learning for Image Recognition
 Kaiming He, Xiangyu Zhang, Shaoqing Ren, Jian Sun
 https://doi.org/10.48550/arXiv.1512.03385
 2015
-
- 
-An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale
-https://doi.org/10.48550/arXiv.2010.11929
-Alexey Dosovitskiy et al.,
-2020.
