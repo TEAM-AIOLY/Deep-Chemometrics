@@ -141,7 +141,7 @@ X_train, X_test, y_train, y_test,  = train_test_split(
     X_pp, y_microbe_array, test_size=0.2, random_state=42, shuffle=True
 )
 
-n_components = 5       
+n_components = 20      
 
 plsr = PLS(ncomp=n_components)
 
@@ -163,11 +163,11 @@ classes =mlda.predict(scores_test)
 proj =mlda.projections
 
 
-# # Create 2D plots
-# create_2d_plot(preds, y_test, label_names, axis_pairs, save_path, show=False)
-# # Create 3D plots
-# create_3d_discriminant_plots(preds, y_test, proj, label_names, save_path, show=False)
-# create_3d_discriminant_plots_mpl(preds, y_test, proj, label_names, save_path, show=False)
+# Create 2D plots
+create_2d_plot(preds, y_test, label_names, axis_pairs, save_path, show=False)
+# Create 3D plots
+create_3d_discriminant_plots(preds, y_test, proj, label_names, save_path, show=False)
+create_3d_discriminant_plots_mpl(preds, y_test, proj, label_names, save_path, show=False)
 
 
 
