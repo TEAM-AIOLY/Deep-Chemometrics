@@ -11,6 +11,7 @@ from data.load_dataset_atonce import MangoDataset
 
 from net.base_net import Darionet
 from utils.misc import data_augmentation
+from PIL import Image
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
          
@@ -43,6 +44,8 @@ LR = 0.002
 p = 0.02
 
 save_path = os.path.dirname(os.path.abspath(data_path)) + f'/models/{model_name}/' + model_name
+gif_frames_dir = os.path.join(save_path, "activation_gif_frames")
+os.makedirs(gif_frames_dir, exist_ok=True)
 
 cal_loader = data_utils.DataLoader(cal, batch_size=BATCH, shuffle=True)
 val_loader = data_utils.DataLoader(val, batch_size=BATCH, shuffle=True)
@@ -88,7 +91,7 @@ for epoch in range(num_epochs):
 
 # Plot saved activations after training
 for epoch, act_list in activations_per_epoch.items():
-    if epoch % activation_save_step == 0:
+    if epoch == 0:
         # Create figure for output spectra
         plt.figure(figsize=(10, 6))
         for i, act in enumerate(act_list):  # One sample per batch
@@ -98,18 +101,43 @@ for epoch, act_list in activations_per_epoch.items():
         plt.ylabel("Output Value")
         plt.legend()
         plt.tight_layout()
-        plt.show(block=False)  # Avoid blocking the execution
+        png_path = os.path.join(gif_frames_dir, f"original.png")
+        plt.savefig(png_path)
+        plt.close()
+    
 
+    if epoch % activation_save_step == 0:
+        
         # Create figure for input spectra (original input data)
-        plt.figure(figsize=(10, 6))
-        for i, input_sample in enumerate(inputs[:4]):  # First 4 samples in batch
-            input_sample_cpu = input_sample.cpu().numpy()
-            plt.plot(wv.flatten(), input_sample_cpu.flatten(), label=f"Input Sample {i+1}")
-        plt.title(f"Epoch {epoch+1}, Input Spectra (4 Samples)")
-        plt.xlabel("Wavelength")
-        plt.ylabel("Input Value")
-        plt.legend()
-        plt.tight_layout()
-        plt.show(block=False)  # Avoid blocking the execution
+        fig, ax = plt.subplots(figsize=(10, 6))
+        for i, act in enumerate(act_list):
+            ax.plot(wv.flatten(), act.numpy().flatten(), label=f"Output Sample {i+1}")
+        ax.set_title(f"Epoch {epoch+1}, Output Spectra (4 Samples)")
+        ax.set_xlabel("Wavelength")
+        ax.set_ylabel("Output Value")
+        ax.legend()
+        fig.tight_layout()
 
-plt.show()  # Make sure the final plots display correctly
+        png_path = os.path.join(gif_frames_dir, f"activation_epoch_{epoch+1:03d}.png")
+        fig.savefig(png_path)
+        plt.close(fig)
+        
+original_frame = os.path.join(gif_frames_dir, "original.png")
+activation_frames = sorted([
+    os.path.join(gif_frames_dir, f)
+    for f in os.listdir(gif_frames_dir)
+    if f.startswith("activation_epoch_") and f.endswith(".png")
+])
+
+# Combine all frames
+all_frames = [Image.open(original_frame)] + [Image.open(p) for p in activation_frames]
+
+# Save the GIF
+gif_path = os.path.join(save_path, "activation_evolution.gif")
+all_frames[0].save(
+    gif_path,
+    save_all=True,
+    append_images=all_frames[1:],
+    duration=500,  # 500 ms per frame
+    loop=0         # infinite loop
+)
