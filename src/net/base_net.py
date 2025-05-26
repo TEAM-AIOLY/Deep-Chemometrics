@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch
-from tensorflow.python.keras.utils.version_utils import training
 from torch import nn
 from einops import rearrange, repeat, pack, unpack
 from einops.layers.torch import Rearrange

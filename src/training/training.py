@@ -6,7 +6,7 @@ import numpy as np
 import os
 
 class Trainer:
-    def __init__(self, model, optimizer, criterion, train_loader, val_loader, config):
+    def __init__(self, model, optimizer, criterion, train_loader, val_loader, config, plot=False):
         self.model = model
         self.optimizer = optimizer
         self.criterion = criterion
@@ -19,6 +19,8 @@ class Trainer:
         self.train_losses = []
         self.val_losses = []
         self.val_metrics = []
+        self.plot = plot
+        self.best_epoch =None
 
     def train_one_epoch(self):
         self.model.train()
@@ -78,15 +80,12 @@ class Trainer:
         return metrics
 
     def train(self):
-        if self.config.save_path:
-            best_model_path = self.config.save_path.with_name(f"{self.config.save_path.stem}_best.pth")
-            os.makedirs(os.path.dirname(best_model_path), exist_ok=True)
 
-            print(f"Saving best model to {best_model_path}")
-
-        else :
+        if self.config.save_path ==None :
             best_model_path = None
             print("No save path specified. Model will not be saved.")
+        else:
+            best_model_path=self.config.save_path + f'_best.pth'
 
         for epoch in range(self.config.num_epochs):
             epoch_train_loss = self.train_one_epoch()
@@ -101,11 +100,13 @@ class Trainer:
                   f"Val Mean Metrics: {np.array(metrics).mean():.4f}")
 
             if best_model_path is not None  :
-                self.best_val_metric = Utils.save_model(model=self.model,path=best_model_path,epoch =  epoch,
+                self.best_val_metric,best_epoch = Utils.save_model(model=self.model,path=best_model_path,epoch =  epoch,
                                                         best_metric=self.best_val_metric,
                                                         current_metric=metrics,
                                                         classification= self.config.classification)
 
-        Utils.plot_losses(self.train_losses, self.val_losses, self.val_metrics, self.config.classification,self.config.max_loss_plot)
 
-        return self.train_losses, self.val_losses, self.val_metrics, best_model_path
+        if self.plot ==True:
+           Utils.plot_losses(self.train_losses, self.val_losses, self.val_metrics, self.config.classification,self.config.max_loss_plot)
+
+        return self.train_losses, self.val_losses, self.val_metrics, best_model_path,best_epoch

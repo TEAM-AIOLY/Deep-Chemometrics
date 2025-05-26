@@ -76,7 +76,7 @@ class TrainerConfig:
                 f"save_path={self.save_path})"
 
     def update_config(self, batch_size=None, learning_rate=None, num_epochs=None, save_model=None,
-                       classification=None, max_loss_plot=None):
+                       classification=None, max_loss_plot=None,save_path=None):
         """
         Method to update configuration parameters dynamically.
 
@@ -100,12 +100,15 @@ class TrainerConfig:
             self.classification = classification
         if max_loss_plot is not None:
             self.max_loss_plot = max_loss_plot
+        if save_path is not None:
+           self.save_path =save_path
 
 
 class Utils:
 
     @staticmethod
     def save_model(model, path, epoch, best_metric, current_metric ,classification):
+        best_epoch = 0
 
         if best_metric == -np.inf:
             torch.save(model.state_dict(), path)
@@ -122,8 +125,9 @@ class Utils:
                 torch.save(model.state_dict(), path)
                 print(f'Model saved at epoch {epoch} to {path}')
                 best_metric = current_metric  # Update best_metric
-
-        return best_metric
+                best_epoch =epoch
+                
+        return best_metric,best_epoch
 
     @staticmethod
     def plot_losses(train_losses, val_losses, val_metrics, classification=False,maxplot_loss = 10):

@@ -4,3 +4,9 @@ __pycache__/
 *$py.class
 *.csv
 *.pth
+*.pdf
+*.pkl
+*.json
+*.txt
+*.text
+data/dataset
