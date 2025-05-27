@@ -87,7 +87,6 @@ spec_dims = x_cal.shape[1]
 
 
 for idx,params in enumerate(params_dict): 
- if idx==0:
     config = TrainerConfig(model_name = model_name)
     config.update_config(batch_size=params['batch_size'],learning_rate=params['LR'],num_epochs=params['num_epochs'],classification=False) 
  

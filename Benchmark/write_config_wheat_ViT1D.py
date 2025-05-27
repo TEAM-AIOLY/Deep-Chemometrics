@@ -3,7 +3,7 @@ import json
 
 
 base_params = {
-    "dataset_type": "hyspex",
+    "dataset_type": "Wheat",
     "data_path": "data/dataset/Wheat/", 
     "y_labels": ['wheat 30 classes'],
     "nb_classes":30,

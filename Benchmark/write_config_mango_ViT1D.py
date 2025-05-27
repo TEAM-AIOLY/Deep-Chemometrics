@@ -3,7 +3,7 @@ import json
 
 
 base_params = {
-    "dataset_type": "VisNIR",
+    "dataset_type": "Mango",
     "data_path": "./data/dataset/Mango/mango_dm_full_outlier_removed2.mat",  
     "y_labels": ['dm_mango'],
     "batch_size": 512,
