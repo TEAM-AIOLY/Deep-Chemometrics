@@ -26,7 +26,7 @@ class DatasetLoader:
         data_path = os.path.abspath(os.path.join(project_root, rel_data_path))
 
         if dataset_type == "mango":
-            mat_file = os.path.join(data_path, "mango_dm_full_outlier_removed2.mat")
+            mat_file = os.path.join(data_path)
             data = sio.loadmat(mat_file)
             Xcal = data["Sp_cal"]
             Ycal = data["DM_cal"]
