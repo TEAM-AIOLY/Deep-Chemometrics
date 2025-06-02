@@ -12,7 +12,7 @@ from torch import nn, optim
 import torch.utils.data as data_utils
 
 from src import utils
-from src.net import ViT_1D
+from src.net import CuiNet_dp
 from src.training.training import Trainer
 from src.utils.misc import TrainerConfig
 from src.utils.Loaddatasets import DatasetLoader
@@ -20,12 +20,12 @@ from src.utils.Loaddatasets import DatasetLoader
 import time
 
 configs = [
-    "data/dataset/ossl/config/_ViT1D_ossl_jz(oc_usda).json",
-    "data/dataset/mango/config/_ViT1D_Mango_jz(dm_mango).json",
-    "data/dataset/wheat/config/_ViT1D_Wheat_jz(Wheat_dt).json"
+    "data/dataset/ossl/config/_CuiNet_ossl_jz(oc_usda).json",
+    "data/dataset/mango/config/_CuiNet_Mango_jz(dm_mango).json",
+    "data/dataset/wheat/config/_CuiNet_Wheat_jz(Wheat_dt).json"
 ]
 
-config_root = configs[2]
+config_root = configs[1]
 root = os.getcwd()
 config_path = os.path.join(root, config_root)
 
@@ -92,15 +92,12 @@ for idx, params in enumerate(params_dicts):
     params['std'] = std
 
     # Model
-    model = ViT_1D(
+    model = CuiNet_dp(
         mean=params['mean'],
         std=params['std'],
-        seq_len=params['spec_dims'],
-        patch_size=params['PS'],
-        dim_embed=params['DE'],
-        trans_layers=params['TL'],
-        heads=params['HDS'],
-        mlp_dim=params['MLP'],
+        dropout=params["DP"],
+        dp_lay=params["dp_lay"],
+        input_dims = params['spec_dims'],
         out_dims=len(params['y_labels'])
     )
 
