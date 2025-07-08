@@ -15,7 +15,7 @@ from torch import nn, optim
 import torch.utils.data as data_utils
 
 from src import utils
-from src.net import CuiNet
+from src.net import Darionet
 from src.training.training import Trainer
 from src.utils.misc import TrainerConfig
 from src.utils.dataset_loader import DatasetLoader
@@ -38,21 +38,23 @@ base_params = {
     "LR": 0.01,
     "EPOCH": 100,
      "WD": 0.003/2,
-     "batch_size" : 512
+     "batch_size" : 512,
+     "RB": 0.01,
 }
 
 DP = [0.1,0.2,0.5]
-LR =[0.0001,0.001,0.01,0.1]
+LR =[0.0001,0.001,0.01]
+FS=[3,5,7,11,13]
 
 param_variations = [
-    {"DP": dp, "LR": lr}    
+    {"DP": dp, "LR": lr,"FS": fs}    
     
-    for dp, lr in itertools.product(DP, LR)
+    for dp, lr,fs in itertools.product(DP, LR,FS)
 ]
 paramsets = [{**base_params, **variation} for variation in param_variations]
-model_type = "Cuinet"
+model_type = "Darionet"
 
-dataset=data_root[0]
+dataset=data_root[2]
 data = DatasetLoader.load(dataset)
 mean = np.mean(data["x_cal"], axis=0)
 std = np.std(data["x_cal"], axis=0)
@@ -102,7 +104,8 @@ for i,param in enumerate(paramsets):
         classification=cls
     )
 
-    model = CuiNet(spec_dims, mean = mean,std = std,dropout=param["DP"], out_dims=1)
+    model = Darionet(mean=mean, std=std, filter_size=param["FS"], reg_beta=param["RB"],
+                     input_dims=spec_dims, out_dims=30, p=param["DP"])
 
 
     nb_train_params = sum(p.numel() for p in model.parameters())
@@ -115,7 +118,7 @@ for i,param in enumerate(paramsets):
 
     trainer = Trainer(model=model, optimizer=optimizer, criterion=crit, train_loader=cal_loader, val_loader=val_loader, config=config)
     train_losses, val_losses,  val_metrics, final_path,best_epoch = trainer.train()
-    print(best_epoch)
+   
     perf,y_pred =utils.test(model, final_path, test_loader,config)    
 
     if cls:
@@ -201,9 +204,13 @@ for i,param in enumerate(paramsets):
         plt.savefig(confmat_pdf_path, format='pdf')
         plt.close('all')
     else:
-        y_true = data["y_test"]
-        y_pred_np = y_pred if isinstance(y_pred, np.ndarray) else y_pred.cpu().numpy()
-        lims = [min(np.min(y_true), np.min(y_pred_np)), max(np.max(y_true), np.max(y_pred_np))]
+        y_true = data["y_test"].ravel()
+        y_pred_np = y_pred if isinstance(y_pred, np.ndarray) else y_pred.cpu().numpy().ravel()
+
+        min_val = min(np.min(y_true), np.min(y_pred_np))
+        max_val = max(np.max(y_true), np.max(y_pred_np))
+        padding = 0.05 * (max_val - min_val)
+        lims = [min_val - padding, max_val + padding]
 
         # Scatter plot
         fig, ax = plt.subplots()
@@ -214,37 +221,36 @@ for i,param in enumerate(paramsets):
         ax.set_xlabel('Real Values')
         ax.set_ylabel('Predicted Values')
         ax.set_title('Predicted vs Real Values')
-        ax.text(1.02, 1, f"CCC: {perf['ccc'][0]:.2f}\nR²: {perf['r2'][0]:.2f}\nRMSEP: {perf['rmsep'][0]:.3f}",
-                transform=ax.transAxes, fontsize=12, verticalalignment='top', horizontalalignment='left',
-                bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5'),
-                color='red', fontweight='bold', fontfamily='serif')
         plt.tight_layout()
         plt.grid()
+        fig.text(0.5, -0.05, f"CCC: {perf['ccc'][0]:.2f}   R²: {perf['r2'][0]:.2f}   RMSEP: {perf['rmsep'][0]:.3f}",
+                ha='center', va='top', fontsize=12,
+                bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5'),
+                color='red', fontweight='bold', fontfamily='serif')
         pdf_path = base_path + f"/predicted_vs_observed_{typ}.pdf"
-        plt.savefig(pdf_path, format='pdf')
+        plt.savefig(pdf_path, format='pdf', bbox_inches='tight')
         plt.close('all')
 
         # Hexbin plot
         fig, ax = plt.subplots()
-        hexbin = ax.hexbin(y_true, y_pred_np, gridsize=50, cmap='viridis', mincnt=1)
+        hexbin = ax.hexbin(data["y_test"], y_pred, gridsize=50, cmap='viridis', mincnt=1)
         cb = fig.colorbar(hexbin, ax=ax, orientation='vertical')
         cb.set_label('Density')
-        ax.plot(lims, lims, 'k-', label=typ)
+        ax.plot(lims, lims, 'k-')
         ax.set_xlim(lims)
         ax.set_ylim(lims)
         ax.set_xlabel('Real Values')
         ax.set_ylabel('Predicted Values')
         ax.set_title('Predicted vs Real Values for dry matter')
-        ax.text(1.02, 1, f"CCC: {perf['ccc'][0]:.2f}\nR²: {perf['r2'][0]:.2f}\nRMSEP: {perf['rmsep'][0]:.3f}",
-                transform=ax.transAxes, fontsize=12, verticalalignment='top', horizontalalignment='left',
-                bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5'),
-                color='red', fontweight='bold', fontfamily='serif')
-        plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15),
-                fancybox=True, shadow=True, ncol=5, fontsize=12)
         plt.tight_layout()
         plt.grid()
+        # Place annotation below the plot, centered
+        fig.text(0.5, -0.05, f"CCC: {perf['ccc'][0]:.2f}   R²: {perf['r2'][0]:.2f}   RMSEP: {perf['rmsep'][0]:.3f}",
+                ha='center', va='top', fontsize=12,
+                bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5'),
+                color='red', fontweight='bold', fontfamily='serif')
         hexbin_pdf_path = base_path + f"/fig_hexbin.pdf"
-        plt.savefig(hexbin_pdf_path, format='pdf')
+        plt.savefig(hexbin_pdf_path, format='pdf', bbox_inches='tight')
         plt.close('all')
 
     if cls:

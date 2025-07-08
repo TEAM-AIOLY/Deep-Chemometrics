@@ -108,11 +108,9 @@ class Utils:
 
     @staticmethod
     def save_model(model, path, epoch, best_metric, current_metric ,classification):
-        best_epoch = 0
-
         if best_metric == -np.inf:
             torch.save(model.state_dict(), path)
-            print(f'Model saved at epoch {epoch} to {path}')
+            # print(f'Model saved at epoch {epoch} to {path}')
 
         current_metric = np.array(current_metric)
         if np.mean(current_metric) > 0:
@@ -123,11 +121,9 @@ class Utils:
 
             if condition:
                 torch.save(model.state_dict(), path)
-                print(f'Model saved at epoch {epoch} to {path}')
-                best_metric = current_metric  # Update best_metric
-                best_epoch =epoch
-                
-        return best_metric,best_epoch
+                # print(f'Model saved at epoch {epoch} to {path}')
+                best_metric = current_metric  # Update best_metric 
+        return best_metric
 
     @staticmethod
     def plot_losses(train_losses, val_losses, val_metrics, classification=False,maxplot_loss = 10):
@@ -163,7 +159,7 @@ class Utils:
         if not classification:
             for i in range(len(val_metrics[0])):
                 metric_scores = [scores[i] for scores in val_metrics]
-                ax2.plot(metric_scores, label=f'R² Score y{i}', linestyle='--', linewidth=2)
+                ax2.plot(metric_scores, label=f'R² Score y{i}', linestyle='--', linewidth=2,color=metric_color)
                 ax2.set_ylim(0, 1)  #
         else:
             ax2.plot(val_metrics, label='F1 Score', linestyle='--', color=metric_color, linewidth=2)

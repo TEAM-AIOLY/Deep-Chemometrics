@@ -6,7 +6,7 @@ import numpy as np
 import os
 
 class Trainer:
-    def __init__(self, model, optimizer, criterion, train_loader, val_loader, config, plot=False):
+    def __init__(self, model, optimizer, criterion, train_loader, val_loader, config):
         self.model = model
         self.optimizer = optimizer
         self.criterion = criterion
@@ -19,8 +19,6 @@ class Trainer:
         self.train_losses = []
         self.val_losses = []
         self.val_metrics = []
-        self.plot = plot
-        self.best_epoch =None
 
     def train_one_epoch(self):
         self.model.train()
@@ -80,14 +78,16 @@ class Trainer:
         return metrics
 
     def train(self):
+        if self.config.save_path:
+            best_model_path = self.config.save_path.with_name(f"{self.config.save_path.stem}_best.pth")
+            os.makedirs(os.path.dirname(best_model_path), exist_ok=True)
 
-        if self.config.save_path ==None :
+            print(f"Saving best model to {best_model_path}")
+
+        else :
             best_model_path = None
             print("No save path specified. Model will not be saved.")
-        else:
-            best_model_path=self.config.save_path + f'_best.pth'
 
-        best_epoch = 0 
         for epoch in range(self.config.num_epochs):
             epoch_train_loss = self.train_one_epoch()
             self.train_losses.append(epoch_train_loss.detach().cpu())
@@ -100,27 +100,12 @@ class Trainer:
                   f"Val Loss: {val_loss[0].detach().cpu().numpy():.4f} | "
                   f"Val Mean Metrics: {np.array(metrics).mean():.4f}")
 
-            
             if best_model_path is not None  :
                 self.best_val_metric = Utils.save_model(model=self.model,path=best_model_path,epoch =  epoch,
                                                         best_metric=self.best_val_metric,
                                                         current_metric=metrics,
                                                         classification= self.config.classification)
-                
-            current_mean = np.mean(metrics.cpu().numpy() if isinstance(metrics, torch.Tensor) else metrics)
-            best_mean = self.best_val_metric if isinstance(self.best_val_metric, float) else np.mean(self.best_val_metric)
-            if current_mean > best_mean:
-                self.best_val_metric = metrics
-                best_epoch = epoch
-                
-            if best_model_path is not None:
-                Utils.save_model(model=self.model, path=best_model_path, epoch=epoch,
-                                best_metric=self.best_val_metric,
-                                current_metric=metrics,
-                                classification=self.config.classification)
 
+        Utils.plot_losses(self.train_losses, self.val_losses, self.val_metrics, self.config.classification,self.config.max_loss_plot)
 
-        if self.plot ==True:
-           Utils.plot_losses(self.train_losses, self.val_losses, self.val_metrics, self.config.classification,self.config.max_loss_plot)
-
-        return self.train_losses, self.val_losses, self.val_metrics, best_model_path,best_epoch
+        return self.train_losses, self.val_losses, self.val_metrics, best_model_path
