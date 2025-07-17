@@ -2,10 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch
-from tensorflow.python.keras.utils.version_utils import training
 from torch import nn
-from einops import rearrange, repeat, pack, unpack
-from einops.layers.torch import Rearrange
 from typing import Callable, Optional, Tuple, Union
 import math
 import numbers
@@ -14,6 +11,141 @@ from torch import Tensor
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
+class channel_mean(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+
+    def forward(self, x):
+        # x is of shape (batch_size, input_channel, input_dims)
+        # Compute the mean across the channel dimension
+        x_mean = torch.mean(x, dim=1, keepdim=True)  # Shape: (batch_size, 1, input_dims)
+        return x_mean
+    
+class channel_max(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+
+    def forward(self, x):
+        # x is of shape (batch_size, input_channel, input_dims)
+        # Compute the max across the channel dimension
+        x_max, _ = x.max(dim=1, keepdim=True)  # Shape: (batch_size, 1, input_dims)
+
+        return x_max
+
+class TMA_net(nn.Module):
+    def __init__(self, input_dims,input_channel, kernel_size = 5 ,aggregation_mode = "conv", n_filters = 1, kernel_size_aggregation = 1 ,fc1_dims = 128,dropout=0.1, out_dims=1):
+        super(TMA_net, self).__init__()
+
+        self.aggregation_mode = aggregation_mode
+        # Dimensions
+        self.conv1d_dims = input_dims
+        self.input_channel = input_channel
+        self.kernel_size = kernel_size
+        self.n_filters = n_filters*self.input_channel
+        self.kernel_size_aggregation = kernel_size_aggregation
+
+        ## Fully connected layers dimensions
+        self.fc1_dims = fc1_dims
+        self.fc2_dims = int(self.fc1_dims/2)
+        self.fc3_dims = int(self.fc2_dims/2)
+        self.out_dims = out_dims
+        self.dropout = nn.Dropout(p=dropout)
+       
+        # Layers
+        self.conv1d = nn.Conv1d(in_channels= self.input_channel, out_channels=self.n_filters, kernel_size=self.kernel_size, padding="same", groups= self.input_channel)
+
+        if self.aggregation_mode == "conv":
+            self.aggregate_block = nn.Conv1d(in_channels= self.n_filters, out_channels=1, kernel_size=self.kernel_size_aggregation, padding="same", groups= 1)
+        elif self.aggregation_mode == "avg":
+            self.aggregate_block = channel_mean()
+        elif self.aggregation_mode == "max":
+            self.aggregate_block = channel_max()
+        else:
+            raise ValueError("Invalid aggregation mode. Choose from 'conv', 'avg', 'none' or 'max'.")
+
+      
+        ## Fully connected layers
+        self.fc1 = nn.Linear(self.conv1d_dims, self.fc1_dims)
+        self.fc2 = nn.Linear(self.fc1_dims, self.fc2_dims)
+        self.fc3 = nn.Linear(self.fc2_dims, self.fc3_dims)
+
+        self.norm = nn.LayerNorm([self.n_filters,self.conv1d_dims])
+
+        ## Output layer
+        self.output_layer = nn.Linear(self.fc3_dims, self.out_dims)
+
+        ## He initialization (Kaiming initialization in PyTorch)
+        self._initialize_weights()
+
+    # def _preprocessing_stage(self, x):
+    #     """Preprocess the input by SNV - SG1st derivative - SG2derivative - usa tyrch"""
+    #     #snv
+    #     x_snv = self.snv(x)
+
+    #     # Derivata 1ª
+    #     x_deriv1 = savgol_filter(x, window_length=11, polyorder=3, deriv=1)
+
+    #     # Derivata 2ª
+    #     x_deriv2 = savgol_filter(x, window_length=11, polyorder=3, deriv=2)
+
+    #     #concatenation
+    #     x = np.vstack([x_snv, x_deriv1, x_deriv2])
+
+    #     #scaling
+    #     X_scaled = (x - np.mean(x, axis=1, keepdims=True)) / np.std(x, axis=1, keepdims=True)
+
+    #     return X_scaled
+        
+    
+    # def snv(self,x):
+    #     """ Imporrt from utils"""
+    #     return (x - np.mean(x, axis=1, keepdims=True)) / np.std(x, axis=1, keepdims=True)
+
+
+    def _initialize_weights(self):
+        for m in self.modules():
+            if isinstance(m, (nn.Conv1d, nn.Linear)):
+                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+                if m.bias is not None:
+                    nn.init.constant_(m.bias, 0)
+
+    def forward(self, x):
+        # x = (x - self.mean) / self.std
+        # x = self._preprocessing_stage(x)
+        # Convolutional layer followed by ELU activation
+        x = x.squeeze(1)
+        x = F.elu(self.conv1d(x))
+        # Apply normalization
+        x = self.norm(x)
+        # Aggregate the features
+        x = self.aggregate_block(x)
+          
+        # Flatten the tensor after convolution
+        x = x.view(x.size(0), -1)
+
+        # Fully connected layers with ELU activation
+        x = F.elu(self.fc1(x))
+        x = self.dropout(x)
+        x = F.elu(self.fc2(x))
+        x = F.elu(self.fc3(x))
+    
+        #Dropout layer
+        # x = self.dropout(x)
+        # Output layer with linear activation
+        output = self.output_layer(x)
+        
+
+        return x
+
+
+
+
+
+
+
 
 
 

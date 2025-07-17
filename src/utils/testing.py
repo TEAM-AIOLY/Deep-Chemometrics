@@ -76,7 +76,8 @@ def test(model, model_path, test_loader, config):
             plt.figure(figsize=(8, 6))
 
             # Scatter plot of X vs Y
-            plt.scatter(Y, y_pred, edgecolors='k', alpha=0.5)
+            print(f"Shape of Y: {Y[:, i].shape}, Shape of y_pred: {y_pred[:, i].shape}")
+            plt.scatter(Y[:, i], y_pred[:, i], edgecolors='k', alpha=0.5)
 
             # Plot of the 45 degree line
             plt.plot([Y.min() - 1, Y.max() + 1], [Y.min() - 1, Y.max() + 1], 'r')

@@ -1,0 +1,15 @@
+﻿Exp No;Exp Name;Run Order;Incl/Excl;kernel_size;aggregation_mode;n_filters;kernel_size_aggregation;fc_dim1;dropout;Y1
+1;N1;2;Incl;1;conv;1;1;32;0,1;
+2;N2;11;Incl;5;conv;5;1;128;0,1;
+3;N3;9;Incl;1;conv;5;9;32;0,5;
+4;N4;5;Incl;5;conv;1;9;128;0,5;
+5;N5;6;Incl;1;avg;1;9;128;0,1;
+6;N6;13;Incl;5;avg;1;1;32;0,5;
+7;N7;3;Incl;5;avg;5;9;128;0,5;
+8;N8;8;Incl;1;max;5;1;32;0,1;
+9;N9;14;Incl;5;max;1;9;32;0,1;
+10;N10;12;Incl;5;max;1;1;128;0,1;
+11;N11;4;Incl;1;max;1;1;128;0,5;
+12;N12;1;Incl;3;max;3;5;80;0,3;
+13;N13;7;Incl;3;max;3;5;80;0,3;
+14;N14;10;Incl;3;max;3;5;80;0,3;

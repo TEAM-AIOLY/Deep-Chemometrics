@@ -68,7 +68,7 @@ class Trainer:
         if not self.config.classification:
             R2 = [torcheval.metrics.R2Score() for _ in range(self.model.out_dims)]
             for i in range(self.model.out_dims):
-                R2[i].update(targets[:, i], outputs[:, i])
+                R2[i].update( outputs[:, i], targets[:, i])
                 metrics.append(R2[i].compute().item())
         else:
             F1 = torcheval.metrics.MulticlassF1Score()
