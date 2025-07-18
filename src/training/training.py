@@ -6,7 +6,7 @@ import numpy as np
 import os
 
 class Trainer:
-    def __init__(self, model, optimizer, criterion, train_loader, val_loader, config):
+    def __init__(self, model, optimizer, criterion, train_loader, val_loader, config, verbose = True):
         self.model = model
         self.optimizer = optimizer
         self.criterion = criterion
@@ -19,6 +19,7 @@ class Trainer:
         self.train_losses = []
         self.val_losses = []
         self.val_metrics = []
+        self.verbose = verbose
 
     def train_one_epoch(self):
         self.model.train()
@@ -81,12 +82,11 @@ class Trainer:
         if self.config.save_path:
             best_model_path = self.config.save_path.with_name(f"{self.config.save_path.stem}_best.pth")
             os.makedirs(os.path.dirname(best_model_path), exist_ok=True)
-
-            print(f"Saving best model to {best_model_path}")
+            print(f"Saving best model to {best_model_path}") if self.verbose else None
 
         else :
             best_model_path = None
-            print("No save path specified. Model will not be saved.")
+            print("No save path specified. Model will not be saved.") if self.verbose else None
 
         for epoch in range(self.config.num_epochs):
             epoch_train_loss = self.train_one_epoch()
@@ -95,17 +95,19 @@ class Trainer:
             val_loss, metrics = self.evaluate()
             self.val_losses.append(val_loss.detach().cpu())
             self.val_metrics.append(metrics)
-            print(f"Epoch {epoch + 1}/{self.config.num_epochs} | "
-                  f"Train Loss: {epoch_train_loss[0].detach().cpu().numpy():.4f} | "
-                  f"Val Loss: {val_loss[0].detach().cpu().numpy():.4f} | "
-                  f"Val Mean Metrics: {np.array(metrics).mean():.4f}")
+            if self.verbose:
+                print(f"Epoch {epoch + 1}/{self.config.num_epochs} | "
+                      f"Train Loss: {epoch_train_loss[0].detach().cpu().numpy():.4f} | "
+                      f"Val Loss: {val_loss[0].detach().cpu().numpy():.4f} | "
+                      f"Val Mean Metrics: {np.array(metrics).mean():.4f}")
 
             if best_model_path is not None  :
                 self.best_val_metric = Utils.save_model(model=self.model,path=best_model_path,epoch =  epoch,
                                                         best_metric=self.best_val_metric,
                                                         current_metric=metrics,
-                                                        classification= self.config.classification)
+                                                        classification= self.config.classification,verbose = self.verbose)
 
-        Utils.plot_losses(self.train_losses, self.val_losses, self.val_metrics, self.config.classification,self.config.max_loss_plot)
+        if self.verbose :
+            Utils.plot_losses(self.train_losses, self.val_losses, self.val_metrics, self.config.classification,self.config.max_loss_plot)
 
         return self.train_losses, self.val_losses, self.val_metrics, best_model_path

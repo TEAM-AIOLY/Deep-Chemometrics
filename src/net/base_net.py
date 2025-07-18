@@ -37,7 +37,7 @@ class channel_max(nn.Module):
 
 class TMA_net(nn.Module):
     def __init__(self, input_dims,input_channel, kernel_size = 5 ,aggregation_mode = "conv", n_filters = 1, kernel_size_aggregation = 1 ,fc1_dims = 128,dropout=0.1, out_dims=1):
-        super(TMA_net, self).__init__()
+        super().__init__()
 
         self.aggregation_mode = aggregation_mode
         # Dimensions
@@ -58,7 +58,7 @@ class TMA_net(nn.Module):
         self.conv1d = nn.Conv1d(in_channels= self.input_channel, out_channels=self.n_filters, kernel_size=self.kernel_size, padding="same", groups= self.input_channel)
 
         if self.aggregation_mode == "conv":
-            self.aggregate_block = nn.Conv1d(in_channels= self.n_filters, out_channels=1, kernel_size=self.kernel_size_aggregation, padding="same", groups= 1)
+            self.aggregate_block = nn.Conv1d(in_channels= self.n_filters, out_channels=1, kernel_size=self.kernel_size_aggregation, padding="same")
         elif self.aggregation_mode == "avg":
             self.aggregate_block = channel_mean()
         elif self.aggregation_mode == "max":
@@ -207,8 +207,8 @@ class CuiNet_dp(nn.Module):
         return x
 
 class Darionet(nn.Module):
-    def __init__(self, mean, std ,filter_size, reg_beta, input_dims,out_dims=1,p = 0.1):
-        super(Darionet, self).__init__()
+    def __init__(self, mean, std ,filter_size, reg_beta, input_dims,out_dims=1):
+        super().__init__()
 
         ## Dimensions of the input layer
         self.input_dims = input_dims
@@ -228,7 +228,7 @@ class Darionet(nn.Module):
         self.out_dims = out_dims
 
         ## L2 regularization (implemented later in the forward pass)
-        self.beta = reg_beta / 2.0
+        self.beta = reg_beta
 
         ## Convolutional layer
         self.conv1 = nn.Conv1d(in_channels=1, out_channels=self.k_number, kernel_size=self.k_width,
@@ -239,7 +239,6 @@ class Darionet(nn.Module):
         self.fc2 = nn.Linear(self.fc1_dims, self.fc2_dims)
         self.fc3 = nn.Linear(self.fc2_dims, self.fc3_dims)
         ## manual dropout layer
-        self.dropout = ManualDropout(p=p)
         ## Output layer
         self.output_layer = nn.Linear(self.fc3_dims, self.out_dims)
 
@@ -268,8 +267,7 @@ class Darionet(nn.Module):
         x = F.elu(self.fc1(x))
         x = F.elu(self.fc2(x))
         x = F.elu(self.fc3(x))
-        #Dropout layer
-        x = self.dropout(x)
+
         # Output layer with linear activation
         output = self.output_layer(x)
 

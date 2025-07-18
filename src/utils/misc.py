@@ -105,11 +105,11 @@ class TrainerConfig:
 class Utils:
 
     @staticmethod
-    def save_model(model, path, epoch, best_metric, current_metric ,classification):
+    def save_model(model, path, epoch, best_metric, current_metric ,classification, verbose=True):
 
         if best_metric == -np.inf:
             torch.save(model.state_dict(), path)
-            print(f'Model saved at epoch {epoch} to {path}')
+            print(f'Model saved at epoch {epoch} to {path}') if verbose else None
 
         current_metric = np.array(current_metric)
         if np.mean(current_metric) > 0:
@@ -120,7 +120,7 @@ class Utils:
 
             if condition:
                 torch.save(model.state_dict(), path)
-                print(f'Model saved at epoch {epoch} to {path}')
+                print(f'Model saved at epoch {epoch} to {path}') if verbose else None
                 best_metric = current_metric  # Update best_metric
 
         return best_metric
