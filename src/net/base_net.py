@@ -80,6 +80,7 @@ class TMA_net(nn.Module):
         ## He initialization (Kaiming initialization in PyTorch)
         self._initialize_weights()
 
+
     # def _preprocessing_stage(self, x):
     #     """Preprocess the input by SNV - SG1st derivative - SG2derivative - usa tyrch"""
     #     #snv
@@ -132,13 +133,8 @@ class TMA_net(nn.Module):
         x = F.elu(self.fc2(x))
         x = F.elu(self.fc3(x))
     
-        #Dropout layer
-        # x = self.dropout(x)
-        # Output layer with linear activation
         output = self.output_layer(x)
-        
-
-        return x
+        return output
 
 
 
