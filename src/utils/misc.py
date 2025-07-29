@@ -159,7 +159,7 @@ class Utils:
         if not classification:
             for i in range(len(val_metrics[0])):
                 metric_scores = [scores[i] for scores in val_metrics]
-                ax2.plot(metric_scores, label=f'R² Score y{i}', linestyle='--', linewidth=2)
+                ax2.plot(metric_scores, label=f'R² Score y{i}', linestyle='--', linewidth=2, color = metric_color)
                 ax2.set_ylim(0, 1)  #
         else:
             ax2.plot(val_metrics, label='F1 Score', linestyle='--', color=metric_color, linewidth=2)

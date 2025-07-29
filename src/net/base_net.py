@@ -81,31 +81,7 @@ class TMA_net(nn.Module):
         self._initialize_weights()
 
 
-    # def _preprocessing_stage(self, x):
-    #     """Preprocess the input by SNV - SG1st derivative - SG2derivative - usa tyrch"""
-    #     #snv
-    #     x_snv = self.snv(x)
-
-    #     # Derivata 1ª
-    #     x_deriv1 = savgol_filter(x, window_length=11, polyorder=3, deriv=1)
-
-    #     # Derivata 2ª
-    #     x_deriv2 = savgol_filter(x, window_length=11, polyorder=3, deriv=2)
-
-    #     #concatenation
-    #     x = np.vstack([x_snv, x_deriv1, x_deriv2])
-
-    #     #scaling
-    #     X_scaled = (x - np.mean(x, axis=1, keepdims=True)) / np.std(x, axis=1, keepdims=True)
-
-    #     return X_scaled
-        
-    
-    # def snv(self,x):
-    #     """ Imporrt from utils"""
-    #     return (x - np.mean(x, axis=1, keepdims=True)) / np.std(x, axis=1, keepdims=True)
-
-
+   
     def _initialize_weights(self):
         for m in self.modules():
             if isinstance(m, (nn.Conv1d, nn.Linear)):
