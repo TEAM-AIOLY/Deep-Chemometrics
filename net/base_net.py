@@ -341,10 +341,10 @@ class CuiNetJCB4(nn.Module):      # 2 coucles de convolution
         
         
         # Layers dimensions
-        conv1d1_dims = (input_dims- kernel_size1)/stride1 +1                     # JCB 22jan25
+        conv1d1_dims = (input_dims- kernel_size1)/stride1 +1                                 # JCB 22jan25
         conv1d2_dims = math.floor((conv1d1_dims-kernel_size2)/stride2 +1)                    # JCB 26jan25  
         conv1d1_dims = 2*conv1d1_dims
-        conv1d2_dims = 4*conv1d2_dims						 # JCB 27jan25 selon l.298
+        conv1d2_dims = 4*conv1d2_dims						                                 # JCB 27jan25 selon l.298
         self.conv1d1_dims= int(conv1d1_dims)
         self.conv1d2_dims= int(conv1d2_dims)
         
