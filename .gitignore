@@ -10,5 +10,5 @@ __pycache__/
 *.text
 *.mat
 *.png
-data/dataset/
+
 results/
