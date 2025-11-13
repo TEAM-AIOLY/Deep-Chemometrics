@@ -4,9 +4,11 @@ import torcheval.metrics
 from src.utils import Utils
 import numpy as np
 import os
+import torch.nn.functional as F
+import math
 
 class Trainer:
-    def __init__(self, model, optimizer, criterion, train_loader, val_loader, config, verbose = True):
+    def __init__(self, model, optimizer, criterion, train_loader, val_loader, config, r_metric = 'r2', verbose = True):
         self.model = model
         self.optimizer = optimizer
         self.criterion = criterion
@@ -16,6 +18,7 @@ class Trainer:
         self.device = torch.device(self.config.device)
         self.model.to(self.device)
         self.best_val_metric = -np.inf
+        self.r_metric = r_metric
         self.train_losses = []
         self.val_losses = []
         self.val_metrics = []
@@ -67,10 +70,22 @@ class Trainer:
     def compute_metrics(self, outputs, targets):
         metrics = []
         if not self.config.classification:
-            R2 = [torcheval.metrics.R2Score() for _ in range(self.model.out_dims)]
-            for i in range(self.model.out_dims):
-                R2[i].update( outputs[:, i], targets[:, i])
-                metrics.append(R2[i].compute().item())
+            if self.r_metric == 'mse':
+                for i in range(self.model.out_dims):
+                    mse = F.mse_loss(outputs[:, i], targets[:, i]).item()
+                    metrics.append(mse)
+
+            elif self.r_metric == 'rmse':
+                for i in range(self.model.out_dims):
+                    rmse = math.sqrt(F.mse_loss(outputs[:, i], targets[:, i]).item())
+                    metrics.append(rmse)
+
+            else:
+
+                R2 = [torcheval.metrics.R2Score() for _ in range(self.model.out_dims)]
+                for i in range(self.model.out_dims):
+                    R2[i].update( outputs[:, i], targets[:, i])
+                    metrics.append(R2[i].compute().item())
         else:
             F1 = torcheval.metrics.MulticlassF1Score()
             F1.update(torch.argmax(targets, dim=1), torch.argmax(outputs, dim=1))
@@ -103,6 +118,7 @@ class Trainer:
 
             if best_model_path is not None  :
                 self.best_val_metric = Utils.save_model(model=self.model,path=best_model_path,epoch =  epoch,
+                                                        r_metric = self.r_metric,
                                                         best_metric=self.best_val_metric,
                                                         current_metric=metrics,
                                                         classification= self.config.classification,verbose = self.verbose)
