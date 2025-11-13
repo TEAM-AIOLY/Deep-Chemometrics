@@ -12,6 +12,28 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+class Normalize01(nn.Module):
+    def __init__(self, dim=-1, eps=1e-8):
+        super().__init__()
+        self.dim = dim
+        self.eps = eps
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # Normalizza ogni spettro lungo la dimensione scelta (default: ultima)
+        min_val = x.min(dim=self.dim, keepdim=True).values
+        max_val = x.max(dim=self.dim, keepdim=True).values
+        return (x - min_val) / (max_val - min_val + self.eps)
+
+
+class L2NormLayer(nn.Module):
+    def __init__(self, dim=1, eps=1e-12):
+        super(L2NormLayer, self).__init__()
+        self.dim = dim
+        self.eps = eps
+
+    def forward(self, x):
+        return F.normalize(x, p=1, dim=self.dim, eps=self.eps)
+
 class channel_mean(nn.Module):
     def __init__(self):
         super().__init__()
@@ -31,15 +53,39 @@ class channel_max(nn.Module):
     def forward(self, x):
         # x is of shape (batch_size, input_channel, input_dims)
         # Compute the max across the channel dimension
-        x_max, _ = x.max(dim=1, keepdim=True)  # Shape: (batch_size, 1, input_dims)
+        #x_max, _ = x.max(dim=1, keepdim=True)  # Shape: (batch_size, 1, input_dims)
+
+        # Indici dei valori con massimo assoluto per ogni posizione
+        idx = torch.argmax(torch.abs(x), dim=1, keepdim=True)  
+        
+        # Recupera i valori originali con il loro segno
+        x_max = torch.gather(x, dim=1, index=idx) 
 
         return x_max
+    
+class channel_svd(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, x):
+        # x is of shape (batch_size, input_channel, input_dims)
+        # Compute the SVD across the channel dimension
+        batch_size, input_channel, input_dims = x.shape
+        x_reshaped = x.view(batch_size, input_dims, -1)  # Reshape to (batch_size, input_channel, input_dims)
+        
+        U, S, Vh = torch.linalg.svd(x, full_matrices=False) 
+
+        # Prima componente  s1 * v1^T
+        pc1_time =  Vh[:, 0, :]  
+        return pc1_time.unsqueeze(1)      # Shape: (batch_size, 1, input_dims)
 
 class TMA_net(nn.Module):
     def __init__(self, input_dims,input_channel, kernel_size = 5 ,aggregation_mode = "conv", n_filters = 1, kernel_size_aggregation = 1 ,fc1_dims = 128,dropout=0.1, out_dims=1):
         super().__init__()
-
+        
+        # Parameters
         self.aggregation_mode = aggregation_mode
+        
         # Dimensions
         self.conv1d_dims = input_dims
         self.input_channel = input_channel
@@ -63,8 +109,10 @@ class TMA_net(nn.Module):
             self.aggregate_block = channel_mean()
         elif self.aggregation_mode == "max":
             self.aggregate_block = channel_max()
+        elif self.aggregation_mode == "svd":
+            self.aggregate_block = channel_svd()
         else:
-            raise ValueError("Invalid aggregation mode. Choose from 'conv', 'avg', 'none' or 'max'.")
+            raise ValueError("Invalid aggregation mode. Choose from 'conv', 'avg' , 'svd' or 'max'.")
 
       
         ## Fully connected layers
@@ -73,14 +121,17 @@ class TMA_net(nn.Module):
         self.fc3 = nn.Linear(self.fc2_dims, self.fc3_dims)
 
         self.norm = nn.LayerNorm([self.n_filters,self.conv1d_dims])
+        #self.norm = L2NormLayer(dim=2)  # dopo il flatten useremo dim=1
+        #self.norm = Normalize01(dim=-1)  # dopo il flatten useremo dim=1
+        # self.norm2 = nn.LayerNorm([1,self.conv1d_dims])
 
+
+        # 
         ## Output layer
         self.output_layer = nn.Linear(self.fc3_dims, self.out_dims)
 
         ## He initialization (Kaiming initialization in PyTorch)
         self._initialize_weights()
-
-
    
     def _initialize_weights(self):
         for m in self.modules():
@@ -91,15 +142,17 @@ class TMA_net(nn.Module):
 
     def forward(self, x):
         # x = (x - self.mean) / self.std
-        # x = self._preprocessing_stage(x)
+        
         # Convolutional layer followed by ELU activation
         x = x.squeeze(1)
         x = F.elu(self.conv1d(x))
         # Apply normalization
         x = self.norm(x)
+
         # Aggregate the features
         x = self.aggregate_block(x)
-          
+        
+        #x = self.norm2(x)
         # Flatten the tensor after convolution
         x = x.view(x.size(0), -1)
 
@@ -113,13 +166,54 @@ class TMA_net(nn.Module):
         return output
 
 
+class comparison_net(nn.Module):
+    def __init__(self, input_dims, mean, std, n_filters = 1, kernel_size = 5, fc1_dims = 128, dropout=0.1, out_dims=1):
+        super(comparison_net, self).__init__()
 
+        # Parameters
+        self.n_filters = n_filters
+        self.kernel_size = kernel_size
 
+        # Dimensions
+        self.conv1d_dims = input_dims
+        self.fc1_dims = fc1_dims
+        self.fc2_dims = int(self.fc1_dims/2)
+        self.fc3_dims = int(self.fc2_dims/2)
+        self.out_dims = out_dims
+        self.dropout = nn.Dropout(p=dropout)
+        self.register_buffer('mean', torch.tensor(mean).float())
+        self.register_buffer('std', torch.tensor(std).float())
 
+        # Layers
+        self.conv1d = nn.Conv1d(in_channels= 1, out_channels=self.n_filters, kernel_size=self.kernel_size, padding="same")
+        self.fc1 = nn.Linear(self.conv1d_dims * self.n_filters, self.fc1_dims)
+        self.fc2 = nn.Linear(self.fc1_dims, self.fc2_dims)
+        self.fc3 = nn.Linear(self.fc2_dims, self.fc3_dims)
+        self.out = nn.Linear(self.fc3_dims, self.out_dims)
+        self._initialize_weights()
 
+    def _initialize_weights(self):
+        for m in self.modules():
+            if isinstance(m, (nn.Conv1d, nn.Linear)):
+                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+                if m.bias is not None:
+                    nn.init.constant_(m.bias, 0)
 
+    def forward(self, x):
+  
+        x = (x - self.mean) / self.std
 
+        x = F.elu(self.conv1d(x))
+        x = x.view(x.size(0), -1)
 
+        x = F.elu(self.fc1(x))
+        x = self.dropout(x)
+        x = F.elu(self.fc2(x))
+        x = F.elu(self.fc3(x))
+
+        x = self.out(x)
+        return x
+    
 
 class CuiNet_dp(nn.Module):
     def __init__(self, input_dims, mean, std, dropout=0.1, dp_lay=1, out_dims=1):
@@ -227,8 +321,9 @@ class Darionet(nn.Module):
 
     def forward(self, x):
         # Reshape input to (batch_size, 1, input_dims) for 1D convolution
+ 
         x = (x - self.mean) / self.std
-
+        
         # Convolutional layer followed by ELU activation
         x = F.elu(self.conv1(x))
 
@@ -246,9 +341,6 @@ class Darionet(nn.Module):
         # Return the final output
         return output
 
-
-
-
 class ManualDropout(nn.Module):
     def __init__(self, p=0.5):
         super(ManualDropout, self).__init__()
@@ -261,7 +353,6 @@ class ManualDropout(nn.Module):
             mask = (torch.rand_like(x) > self.p).float()
             x = x * mask / (1 - self.p)
         return x
-
 
 
 class CuiNet(nn.Module):

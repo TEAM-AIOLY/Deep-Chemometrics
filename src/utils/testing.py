@@ -4,10 +4,13 @@ Created on Thu Aug  1 14:58:26 2024
 @author: metz
 """
 import numpy as np
+import pandas as pd
+
 import torch
 
 import matplotlib.pyplot as plt
 from sklearn.metrics import r2_score
+import matplotlib as mpl
 
 
 def RMSEP(y_true, y_pred):
@@ -37,7 +40,7 @@ def ccc(y_true, y_pred):
     return (ccc)
 
 
-def test(model, model_path, test_loader, config):
+def test(model, model_path, test_loader, config, Residual = False , classes = None):
     Y = []
     y_pred = []
     model.load_state_dict(torch.load(model_path))
@@ -73,25 +76,97 @@ def test(model, model_path, test_loader, config):
 
             print(f"CCC: {ccc_score}, R2: {r2_score_}, RMSEP: {rmsep_score}")
 
-            plt.figure(figsize=(8, 6))
+    # Creazione figura con due subplot affiancati
+    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
 
-            # Scatter plot of X vs Y
-            print(f"Shape of Y: {Y[:, i].shape}, Shape of y_pred: {y_pred[:, i].shape}")
-            plt.scatter(Y[:, i], y_pred[:, i], edgecolors='k', alpha=0.5)
+    
+    # stile marker
+    scatter_kwargs = dict(edgecolors='k', alpha=0.8, s=60, linewidths=0.5)
 
-            # Plot of the 45 degree line
-            plt.plot([Y.min() - 1, Y.max() + 1], [Y.min() - 1, Y.max() + 1], 'r')
-            # add text with cc_score and r2_score
-            plt.text(0.95, 0.05, f'CCC: {ccc_score:.2f}\nR²: {r2_score_:.2f}',
-                     transform=plt.gca().transAxes, fontsize=12,
-                     verticalalignment='bottom', horizontalalignment='right',
-                     bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5'),
-                     color='red', fontweight='bold', fontfamily='serif')
+    # -------------------------------------------------------
+    # Prepara mapping colori (categorico vs continuo)
+    # -------------------------------------------------------
+    cmap = norm = labels = color_list = codes = None
+    is_categorical = False
 
-            plt.xticks(fontsize=16)
-            plt.yticks(fontsize=16)
-            plt.xlabel('Observed', fontsize=16)
-            plt.ylabel('Predicted', fontsize=16)
-            plt.title(f'Predicted vs Observed for y{i}', fontsize=16)
+    if classes is not None:
+        c_raw = np.asarray(classes)
+        if c_raw.shape[0] != Y.shape[0]:
+            raise ValueError("`classes` deve avere la stessa lunghezza di Y/y_pred.")
 
-            plt.show(block=False)
+        # categorico se stringhe/oggetti, oppure interi con poche modalità
+        n_unique = (pd.unique(c_raw).size
+                    if c_raw.dtype.kind in ('U','S','O')
+                    else np.unique(c_raw).size)
+        is_categorical = (c_raw.dtype.kind in ('U','S','O')) or (np.issubdtype(c_raw.dtype, np.integer) and n_unique <= 20)
+
+        if is_categorical:
+            cats   = pd.Categorical(c_raw)   # preserva l'ordine delle categorie
+            codes  = cats.codes              # 0..K-1, -1 per NaN
+            labels = list(cats.categories)
+            K = len(labels)
+            base = plt.get_cmap('tab20')     # tavolozza discreta
+            color_list = [base(i % base.N) for i in range(K)]
+            cmap = mpl.colors.ListedColormap(color_list)
+            norm = mpl.colors.BoundaryNorm(np.arange(-0.5, K + 0.5, 1), K)
+        else:
+            c_vals = c_raw.astype(float)     # continuo
+
+    # -------------------------------------------------------
+    # Subplot 1: Predicted vs Observed
+    # -------------------------------------------------------
+    if classes is None:
+        axes[0].scatter(Y[:, i], y_pred[:, i], **scatter_kwargs)
+    elif is_categorical:
+        m = codes != -1
+        axes[0].scatter(Y[m, i], y_pred[m, i],
+                        c=codes[m], cmap=cmap, norm=norm, **scatter_kwargs)
+        # legenda coerente coi colori dei punti
+        handles = [plt.Line2D([0],[0], marker='o', linestyle='',
+                            color='w', markerfacecolor=color_list[k],
+                            markeredgecolor='k', markersize=8, label=str(lbl))
+                for k, lbl in enumerate(labels)]
+        axes[0].legend(handles=handles, title="Class")
+    else:
+        sc0 = axes[0].scatter(Y[:, i], y_pred[:, i],
+                            c=c_vals, cmap='viridis', **scatter_kwargs)
+        plt.colorbar(sc0, ax=axes[0], label="Class")
+
+    axes[0].plot([Y.min() - 1, Y.max() + 1], [Y.min() - 1, Y.max() + 1], 'r', lw=2)
+    axes[0].text(0.95, 0.05,
+                f'RMSEP: {rmsep_score:.2f}\nCCC: {ccc_score:.2f}\n$\\mathbf{{R}}^2$: {r2_score_:.2f}',
+                transform=axes[0].transAxes, fontsize=12, va='bottom', ha='right',
+                bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5'),
+                color='red', fontweight='bold', fontfamily='serif')
+    axes[0].set_xlabel('Observed', fontsize=16)
+    axes[0].set_ylabel('Predicted', fontsize=16)
+    axes[0].set_title(f'Predicted vs Observed for y{i+1}', fontsize=16)
+    axes[0].tick_params(labelsize=14)
+
+    # -------------------------------------------------------
+    # Subplot 2: Residui
+    # -------------------------------------------------------
+    if Residual:
+        residuals = Y[:, i] - y_pred[:, i]
+        if classes is None:
+            axes[1].scatter(Y[:, i], residuals, **scatter_kwargs)
+        elif is_categorical:
+            m = codes != -1
+            axes[1].scatter(Y[m, i], residuals[m],
+                            c=codes[m], cmap=cmap, norm=norm, **scatter_kwargs)
+            axes[1].legend(handles=handles, title="Classi")
+        else:
+            sc1 = axes[1].scatter(Y[:, i], residuals,
+                                c=c_vals, cmap='viridis', **scatter_kwargs)
+            plt.colorbar(sc1, ax=axes[1], label="Classe")
+        axes[1].axhline(0, color='r', linestyle='--', linewidth=2)
+        axes[1].set_xlabel('Observed', fontsize=16)
+        axes[1].set_ylabel('Residuals', fontsize=16)
+        axes[1].set_title(f'Residuals for y{i+1}', fontsize=16)
+        axes[1].tick_params(labelsize=14)
+    else:
+        fig.delaxes(axes[1])
+        axes = np.array([axes[0]])
+
+    plt.tight_layout()
+    plt.show(block=False)
